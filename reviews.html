@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pavan's reviews of movies, food, items, and more - with time-decay scoring">
+    <title>Reviews | Pavan</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    <script src="reviews-data.js"></script>
+</head>
+
+<body>
+    <!-- Background decorations -->
+    <div class="bg-decoration">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+        <div class="wave-pattern"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <a href="index.html" class="nav-logo">
+            <span class="logo-symbol">⛩</span>
+            <span class="logo-text">Pavan</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="reviews.html" class="active">Reviews</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        
+        <!-- Page Header -->
+        <section class="page-header">
+            <span class="cherry-blossom header-blossom">✿</span>
+            <h1 class="hero-title">
+                My <span class="gradient-text">Reviews</span>
+            </h1>
+            <p class="hero-subtitle">
+                <span class="retro-text">// scores decay over time - freshness matters</span>
+            </p>
+        </section>
+
+        <!-- Category Buttons -->
+        <div class="category-bar">
+            <button class="category-btn" data-category="movie">🎬 Movies</button>
+            <button class="category-btn" data-category="food">🍜 Food</button>
+            <button class="category-btn" data-category="item">📦 Items</button>
+            <button class="category-btn" data-category="game">🎮 Games</button>
+        </div>
+
+        <!-- Grading Info Section (shown by default) -->
+        <section class="grading-info" id="grading-info">
+            <div class="zen-card grading-card">
+                <h2 class="grading-title">
+                    <span class="retro-text">// how i grade</span>
+                </h2>
+                
+                <div class="grading-section">
+                    <h3>The Decay Formula</h3>
+                    <div class="formula-box">
+                        <code>score = (base + adjustments) × 0.5<sup>(days / 90)</sup></code>
+                    </div>
+                    <p>Scores naturally decay over time. A perfect 10 today becomes a 5 after 90 days. This reflects how impressions fade and keeps reviews fresh.</p>
+                </div>
+
+                <div class="grading-section">
+                    <h3>Score Adjustments</h3>
+                    <p>When my opinion changes, I add <code>+1</code> or <code>-1</code> adjustments. These modify the base score before decay applies.</p>
+                </div>
+
+                <div class="grading-section">
+                    <h3>Score Colors</h3>
+                    <div class="score-scale">
+                        <div class="score-tier">
+                            <span class="tier-bar" style="background: #22c55e; width: 100%;"></span>
+                            <span class="tier-label">8-10 Excellent</span>
+                        </div>
+                        <div class="score-tier">
+                            <span class="tier-bar" style="background: #84cc16; width: 80%;"></span>
+                            <span class="tier-label">6-8 Good</span>
+                        </div>
+                        <div class="score-tier">
+                            <span class="tier-bar" style="background: #eab308; width: 60%;"></span>
+                            <span class="tier-label">4-6 Average</span>
+                        </div>
+                        <div class="score-tier">
+                            <span class="tier-bar" style="background: #f97316; width: 40%;"></span>
+                            <span class="tier-label">2-4 Below Average</span>
+                        </div>
+                        <div class="score-tier">
+                            <span class="tier-bar" style="background: #ef4444; width: 20%;"></span>
+                            <span class="tier-label">0-2 Poor</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grading-section">
+                    <h3>The Decay Bar</h3>
+                    <p>Each review has a horizontal bar that shows the current score. Watch it animate from full width down to the decayed value!</p>
+                    <div class="demo-bar">
+                        <div class="demo-bar-track">
+                            <div class="demo-bar-fill"></div>
+                        </div>
+                        <span class="demo-label">Example: 10 → 6.5 after 60 days</span>
+                    </div>
+                </div>
+
+                <p class="grading-cta">
+                    <span class="retro-text">// select a category above to see reviews</span>
+                </p>
+            </div>
+        </section>
+
+        <!-- Reviews Container (hidden by default) -->
+        <section class="reviews-section" id="reviews-section" style="display: none;">
+            <button class="back-btn" id="back-btn">
+                ← Back to grading info
+            </button>
+            <h2 class="category-title" id="category-title"></h2>
+            <div class="reviews-list" id="reviews-container">
+                <!-- Reviews will be rendered here by JavaScript -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <p class="footer-text">
+            <span class="retro-text">2025</span>
+            <span class="footer-divider">◈</span>
+            <span class="retro-text">made with ♡</span>
+        </p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Fallback data for local testing (when fetch doesn't work)
+        const FALLBACK_REVIEWS = [
+            { title: "Inception", category: "movie", icon: "🎬", tags: ["Sci-Fi", "Thriller", "Must Watch"], initialScore: 10, initialDate: "2024-11-15", history: [] },
+            { title: "Ichiran Ramen", category: "food", icon: "🍜", tags: ["Japanese", "Ramen", "Worth It"], initialScore: 8, initialDate: "2024-10-10", history: [] },
+            { title: "Sony WH-1000XM5", category: "item", icon: "📦", tags: ["Audio", "Tech", "Daily Driver"], initialScore: 10, initialDate: "2024-09-05", history: [] },
+            { title: "Elden Ring", category: "game", icon: "🎮", tags: ["RPG", "Open World", "Challenging"], initialScore: 10, initialDate: "2024-08-01", history: [] },
+            { title: "Spider-Man: Across the Spider-Verse", category: "movie", icon: "🎬", tags: ["Animation", "Superhero", "Masterpiece"], initialScore: 10, initialDate: "2024-07-15", history: [] },
+            { title: "Homemade Butter Chicken", category: "food", icon: "🍜", tags: ["Indian", "Homemade", "Comfort Food"], initialScore: 8, initialDate: "2024-11-01", history: [] }
+        ];
+
+        const CATEGORY_NAMES = {
+            movie: '🎬 Movies',
+            food: '🍜 Food',
+            item: '📦 Items',
+            game: '🎮 Games'
+        };
+
+        let allReviews = [];
+
+        // Render reviews for a specific category
+        function renderReviews(category) {
+            const container = document.getElementById('reviews-container');
+            container.innerHTML = '';
+
+            const filtered = allReviews.filter(r => r.category === category);
+            
+            if (filtered.length === 0) {
+                container.innerHTML = '<p class="no-reviews retro-text">// no reviews yet in this category</p>';
+                return;
+            }
+
+            filtered.forEach((review, index) => {
+                const decay = calculateDecayedScore(review);
+                const color = getScoreColor(decay.currentScore);
+                
+                const card = document.createElement('div');
+                card.className = 'review-item';
+                card.style.animationDelay = `${index * 0.1}s`;
+                
+                card.innerHTML = `
+                    <div class="review-item-header">
+                        <span class="review-icon">${review.icon}</span>
+                        <div class="review-info">
+                            <h3 class="review-title">${review.title}</h3>
+                            <div class="review-meta">
+                                <span class="review-date">${formatDate(review.initialDate)}</span>
+                                <span class="review-separator">•</span>
+                                <span class="review-days">${decay.daysElapsed} days ago</span>
+                            </div>
+                        </div>
+                        <div class="score-badge" style="background: ${color};">
+                            <span class="score-value">${decay.currentScore}</span>
+                            <span class="score-max">/10</span>
+                        </div>
+                    </div>
+                    
+                    <!-- DECAY BAR - Animated horizontal bar -->
+                    <div class="decay-bar-wrapper">
+                        <div class="decay-bar-track">
+                            <div class="decay-bar-fill" 
+                                 style="--bar-color: ${color}; --bar-width: ${decay.ribbonWidth}%;">
+                            </div>
+                        </div>
+                        <div class="decay-bar-info">
+                            <span class="bar-label">Base: ${decay.baseScore}/10</span>
+                            <span class="bar-decay">Decayed: ${decay.decayPercentage}%</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Tags -->
+                    <div class="review-tags">
+                        ${review.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+
+            // Trigger ribbon animations
+            setTimeout(() => {
+                document.querySelectorAll('.decay-bar-fill').forEach((bar, i) => {
+                    setTimeout(() => {
+                        bar.classList.add('animate');
+                    }, i * 150);
+                });
+            }, 300);
+        }
+
+        // Format date
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        }
+
+        // Show reviews for a category
+        function showCategory(category) {
+            document.getElementById('grading-info').style.display = 'none';
+            document.getElementById('reviews-section').style.display = 'block';
+            document.getElementById('category-title').textContent = CATEGORY_NAMES[category];
+            
+            // Update active button
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.category === category);
+            });
+            
+            renderReviews(category);
+        }
+
+        // Show grading info (home state)
+        function showGradingInfo() {
+            document.getElementById('grading-info').style.display = 'block';
+            document.getElementById('reviews-section').style.display = 'none';
+            
+            // Remove active from all buttons
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+        }
+
+        // Setup event listeners
+        function setupEvents() {
+            // Category buttons
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    showCategory(btn.dataset.category);
+                });
+            });
+            
+            // Back button
+            document.getElementById('back-btn').addEventListener('click', showGradingInfo);
+        }
+
+        // Animate demo bar on grading page
+        function animateDemoBar() {
+            const demoFill = document.querySelector('.demo-bar-fill');
+            if (demoFill) {
+                setTimeout(() => {
+                    demoFill.classList.add('animate');
+                }, 500);
+            }
+        }
+
+        // Initialize
+        async function init() {
+            try {
+                if (typeof fetchAllReviews === 'function') {
+                    allReviews = await fetchAllReviews();
+                }
+                
+                if (!allReviews || allReviews.length === 0) {
+                    allReviews = FALLBACK_REVIEWS;
+                }
+                
+                allReviews.sort((a, b) => new Date(b.initialDate) - new Date(a.initialDate));
+                
+                setupEvents();
+                animateDemoBar();
+            } catch (error) {
+                console.error('Failed to load reviews:', error);
+                allReviews = FALLBACK_REVIEWS;
+                allReviews.sort((a, b) => new Date(b.initialDate) - new Date(a.initialDate));
+                setupEvents();
+                animateDemoBar();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+</body>
+</html>

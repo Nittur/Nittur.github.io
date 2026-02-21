@@ -1,0 +1,1322 @@
+/* ============================================
+   STYLES.CSS - Main stylesheet
+   
+   AESTHETIC: Optimistic Futurism + Japanese Cultural Elements + Retro + Holi Colors
+   
+   JAPANESE ELEMENTS USED:
+   - ⛩ Torii gate (logo)
+   - ✿ Cherry blossom (sakura)
+   - Seigaiha wave pattern (background)
+   - Corner frame decorations
+   - Zen-inspired spacing and minimalism
+   
+   TABLE OF CONTENTS:
+   1. CSS Variables
+   2. Reset & Base Styles
+   3. Background Decorations (including Japanese wave pattern)
+   4. Navigation
+   5. Layout & Container
+   6. Typography
+   7. Home Page (single viewport)
+   8. Cards & Components
+   9. Reviews Page
+   10. Footer
+   11. Animations
+   12. Responsive Design
+   ============================================ */
+
+
+/* ============================================
+   1. CSS VARIABLES
+   ============================================ */
+
+:root {
+    /* === HOLI-INSPIRED COLOR PALETTE === */
+    --color-pink: #FF6B9D;
+    --color-orange: #FF8E53;
+    --color-yellow: #FFD93D;
+    --color-blue: #6C63FF;
+    --color-cyan: #4ECDC4;
+    --color-magenta: #C44569;
+    
+    /* === ZEN/NEUTRAL COLORS === */
+    --color-bg: #0D0D0D;
+    --color-bg-light: #1A1A2E;
+    --color-bg-card: #16213E;
+    --color-text: #F0F0F0;
+    --color-text-muted: #888;
+    
+    /* === TYPOGRAPHY === */
+    --font-main: 'Zen Maru Gothic', sans-serif;
+    --font-heading: 'Noto Serif JP', serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    
+    /* === SPACING === */
+    --space-xs: 0.5rem;
+    --space-sm: 1rem;
+    --space-md: 2rem;
+    --space-lg: 4rem;
+    --space-xl: 6rem;
+    
+    /* === OTHER === */
+    --border-radius: 12px;
+    --transition-speed: 0.3s;
+    --max-width: 1200px;
+}
+
+
+/* ============================================
+   2. RESET & BASE STYLES
+   ============================================ */
+
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-main);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--color-text);
+    background-color: var(--color-bg);
+    min-height: 100vh;
+    overflow-x: hidden;
+    
+    background: linear-gradient(
+        135deg,
+        var(--color-bg) 0%,
+        #1a1a2e 50%,
+        #0f0f23 100%
+    );
+    background-attachment: fixed;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+ul {
+    list-style: none;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+
+/* ============================================
+   3. BACKGROUND DECORATIONS
+   Includes Japanese wave pattern (seigaiha)
+   ============================================ */
+
+.bg-decoration {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+}
+
+/* Floating gradient shapes */
+.shape {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.15;
+    animation: float 20s ease-in-out infinite;
+}
+
+.shape-1 {
+    width: 400px;
+    height: 400px;
+    background: var(--color-pink);
+    top: -100px;
+    right: -100px;
+}
+
+.shape-2 {
+    width: 300px;
+    height: 300px;
+    background: var(--color-blue);
+    bottom: 20%;
+    left: -50px;
+    animation-delay: -5s;
+}
+
+.shape-3 {
+    width: 250px;
+    height: 250px;
+    background: var(--color-cyan);
+    top: 40%;
+    right: 10%;
+    animation-delay: -10s;
+}
+
+.shape-4 {
+    width: 350px;
+    height: 350px;
+    background: var(--color-yellow);
+    bottom: -100px;
+    left: 30%;
+    animation-delay: -15s;
+}
+
+/* ============================================
+   JAPANESE WAVE PATTERN (SEIGAIHA)
+   Creates a subtle wave pattern at the bottom
+   using CSS gradients - no images needed!
+   ============================================ */
+.wave-pattern {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 150px;
+    opacity: 0.05;
+    
+    /* 
+       This creates the traditional Japanese wave pattern
+       using repeating radial gradients 
+    */
+    background: 
+        radial-gradient(circle at 50% 100%, transparent 50%, var(--color-pink) 50%, var(--color-pink) 55%, transparent 55%),
+        radial-gradient(circle at 0% 100%, transparent 50%, var(--color-cyan) 50%, var(--color-cyan) 55%, transparent 55%),
+        radial-gradient(circle at 100% 100%, transparent 50%, var(--color-cyan) 50%, var(--color-cyan) 55%, transparent 55%);
+    background-size: 60px 30px;
+    background-position: 0 0, -30px 0, 30px 0;
+}
+
+
+/* ============================================
+   4. NAVIGATION
+   ============================================ */
+
+.main-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    max-width: var(--max-width);
+    margin: 0 auto;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13, 13, 13, 0.8);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: 1.5rem;
+    font-weight: 700;
+    transition: transform var(--transition-speed);
+}
+
+.nav-logo:hover {
+    transform: scale(1.05);
+}
+
+/* Torii gate symbol - Japanese cultural icon */
+.logo-symbol {
+    font-size: 1.8rem;
+    /* Add slight glow effect */
+    text-shadow: 0 0 10px rgba(255, 107, 157, 0.5);
+}
+
+.logo-text {
+    font-family: var(--font-heading);
+}
+
+.nav-links {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.nav-links a {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--border-radius);
+    transition: all var(--transition-speed);
+    position: relative;
+}
+
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--color-pink), var(--color-blue));
+    transition: all var(--transition-speed);
+    transform: translateX(-50%);
+}
+
+.nav-links a:hover::after,
+.nav-links a.active::after {
+    width: 80%;
+}
+
+.nav-links a.active {
+    color: var(--color-pink);
+}
+
+
+/* ============================================
+   5. LAYOUT & CONTAINER
+   ============================================ */
+
+.container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--space-md);
+    padding-top: var(--space-lg);
+}
+
+
+/* ============================================
+   6. TYPOGRAPHY
+   ============================================ */
+
+.hero-title {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: var(--space-sm);
+}
+
+/* Gradient text - Holi colors */
+.gradient-text {
+    background: linear-gradient(
+        135deg,
+        var(--color-pink),
+        var(--color-orange),
+        var(--color-yellow),
+        var(--color-cyan),
+        var(--color-blue)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    background-size: 200% 200%;
+    animation: gradientShift 5s ease infinite;
+}
+
+.retro-text {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    color: var(--color-cyan);
+}
+
+.hero-subtitle {
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-sm);
+}
+
+/* Cherry blossom decorative element */
+.cherry-blossom {
+    font-size: 2rem;
+    color: var(--color-pink);
+    display: inline-block;
+    margin-bottom: var(--space-xs);
+    animation: floatBlossom 3s ease-in-out infinite;
+    text-shadow: 0 0 15px rgba(255, 107, 157, 0.5);
+}
+
+.header-blossom {
+    display: block;
+    text-align: center;
+    margin-bottom: var(--space-sm);
+}
+
+
+/* ============================================
+   7. HOME PAGE - SINGLE VIEWPORT LAYOUT
+   
+   Uses flexbox to fill exactly one screen
+   Two-column layout on desktop
+   ============================================ */
+
+/* Special class for home page to prevent scroll */
+.home-page {
+    height: 100vh;
+    overflow: hidden;
+}
+
+.home-container {
+    height: calc(100vh - 60px); /* Subtract nav height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--space-md);
+    max-width: var(--max-width);
+    margin: 0 auto;
+}
+
+/* Two-column content area */
+.home-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-lg);
+    flex: 1;
+}
+
+/* Left column: text content */
+.home-text {
+    flex: 1;
+    max-width: 500px;
+}
+
+.about-text-compact {
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-md);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* Right column: visual/gif */
+.home-visual {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 450px;
+}
+
+/* Meme container with Japanese-inspired frame */
+.meme-container {
+    position: relative;
+    padding: var(--space-sm);
+    border: 2px solid var(--color-text-muted);
+    border-radius: var(--border-radius);
+    background: var(--color-bg-light);
+    box-shadow: 
+        0 0 20px rgba(255, 107, 157, 0.1),
+        0 0 40px rgba(108, 99, 255, 0.1);
+}
+
+.welcome-gif {
+    max-width: 350px;
+    border-radius: 8px;
+}
+
+.meme-caption {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-top: var(--space-sm);
+    font-style: italic;
+    text-align: center;
+}
+
+/* Corner decorations (Japanese frame style) */
+.corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--color-pink);
+    opacity: 0.6;
+}
+
+.corner-tl {
+    top: 8px;
+    left: 8px;
+    border-right: none;
+    border-bottom: none;
+}
+
+.corner-tr {
+    top: 8px;
+    right: 8px;
+    border-left: none;
+    border-bottom: none;
+}
+
+.corner-bl {
+    bottom: 8px;
+    left: 8px;
+    border-right: none;
+    border-top: none;
+}
+
+.corner-br {
+    bottom: 8px;
+    right: 8px;
+    border-left: none;
+    border-top: none;
+}
+
+/* Quick links */
+.quick-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
+.pill-link {
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: 50px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all var(--transition-speed);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.pill-link:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.pill-pink {
+    background: linear-gradient(135deg, var(--color-pink), var(--color-magenta));
+    color: white;
+}
+
+.pill-yellow {
+    background: linear-gradient(135deg, var(--color-yellow), var(--color-orange));
+    color: #333;
+}
+
+.pill-blue {
+    background: linear-gradient(135deg, var(--color-cyan), var(--color-blue));
+    color: white;
+}
+
+/* Home page inline footer */
+.home-footer {
+    text-align: center;
+    padding: var(--space-sm) 0;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+}
+
+.footer-symbol {
+    margin: 0 var(--space-sm);
+    color: var(--color-pink);
+}
+
+
+/* ============================================
+   8. CARDS & COMPONENTS
+   ============================================ */
+
+.zen-card {
+    background: var(--color-bg-card);
+    border-radius: var(--border-radius);
+    padding: var(--space-md);
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 
+        0 4px 30px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.zen-card.small {
+    padding: var(--space-sm);
+}
+
+
+/* ============================================
+   9. REVIEWS PAGE
+   ============================================ */
+
+.page-header {
+    text-align: center;
+    padding: var(--space-md) 0;
+}
+
+/* ============================================
+   CATEGORY BUTTONS
+   ============================================ */
+
+.category-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+    padding: var(--space-sm);
+}
+
+.category-btn {
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    padding: var(--space-sm) var(--space-md);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius);
+    background: var(--color-bg-card);
+    color: var(--color-text);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+.category-btn:hover {
+    border-color: var(--color-pink);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(255, 107, 157, 0.2);
+}
+
+.category-btn.active {
+    background: linear-gradient(135deg, var(--color-pink), var(--color-magenta));
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 5px 20px rgba(255, 107, 157, 0.3);
+}
+
+/* ============================================
+   GRADING INFO SECTION
+   ============================================ */
+
+.grading-info {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.grading-card {
+    padding: var(--space-lg);
+}
+
+.grading-title {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-lg);
+    text-align: center;
+}
+
+.grading-section {
+    margin-bottom: var(--space-lg);
+}
+
+.grading-section h3 {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    color: var(--color-cyan);
+    margin-bottom: var(--space-sm);
+}
+
+.grading-section p {
+    color: var(--color-text-muted);
+    line-height: 1.8;
+}
+
+.grading-section code {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    color: var(--color-yellow);
+}
+
+.formula-box {
+    background: rgba(0, 0, 0, 0.3);
+    padding: var(--space-md);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--space-sm);
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.formula-box code {
+    font-size: 1.1rem;
+    background: none;
+    padding: 0;
+}
+
+/* Score Scale Visual */
+.score-scale {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-top: var(--space-sm);
+}
+
+.score-tier {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.tier-bar {
+    height: 24px;
+    border-radius: 4px;
+    box-shadow: 0 0 10px currentColor;
+}
+
+.tier-label {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
+/* Demo Bar */
+.demo-bar {
+    margin-top: var(--space-sm);
+}
+
+.demo-bar-track {
+    height: 36px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.demo-bar-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #84cc16, #22c55e);
+    border-radius: 6px;
+    box-shadow: 0 0 15px #84cc16;
+    transition: none;
+}
+
+.demo-bar-fill.animate {
+    width: 65%;
+    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.demo-label {
+    display: block;
+    margin-top: var(--space-xs);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+.grading-cta {
+    text-align: center;
+    margin-top: var(--space-lg);
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ============================================
+   REVIEWS SECTION
+   ============================================ */
+
+.reviews-section {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.back-btn {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    padding: var(--space-xs) var(--space-sm);
+    background: transparent;
+    border: 1px solid var(--color-text-muted);
+    border-radius: var(--border-radius);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    margin-bottom: var(--space-md);
+}
+
+.back-btn:hover {
+    border-color: var(--color-pink);
+    color: var(--color-pink);
+}
+
+.category-title {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    margin-bottom: var(--space-lg);
+    text-align: center;
+}
+
+.no-reviews {
+    text-align: center;
+    padding: var(--space-xl);
+    color: var(--color-text-muted);
+}
+
+/* Old filter styles - kept for compatibility */
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-lg);
+    padding: var(--space-sm);
+}
+
+.filter-btn {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    padding: var(--space-xs) var(--space-sm);
+    border: 1px solid var(--color-text-muted);
+    border-radius: 50px;
+    background: transparent;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+.filter-btn:hover {
+    border-color: var(--color-pink);
+    color: var(--color-pink);
+}
+
+.filter-btn.active {
+    background: var(--color-pink);
+    border-color: var(--color-pink);
+    color: white;
+}
+
+.reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+/* Reviews List Layout - vertical cards with prominent ribbons */
+.reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ============================================
+   DECAY RIBBON SYSTEM
+   Visualizes score decay over time
+   ============================================ */
+
+.decay-info {
+    max-width: 600px;
+    margin: 0 auto var(--space-md);
+    text-align: center;
+}
+
+.formula-text {
+    font-size: 0.9rem;
+    margin-bottom: var(--space-xs);
+}
+
+.formula-text code {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    color: var(--color-yellow);
+    margin-left: var(--space-xs);
+}
+
+.formula-hint {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+/* Updated Review Card for Decay System */
+.review-card {
+    background: var(--color-bg-card);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    transition: all var(--transition-speed);
+    padding: var(--space-sm);
+    /* Fade in animation */
+    animation: cardFadeIn 0.5s ease forwards;
+    opacity: 0;
+}
+
+@keyframes cardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.review-card:hover {
+    border-color: rgba(255, 107, 157, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.review-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.review-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.review-info {
+    flex: 1;
+}
+
+.review-title {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+}
+
+.review-meta {
+    display: flex;
+    gap: var(--space-sm);
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.review-days {
+    font-family: var(--font-mono);
+    color: var(--color-cyan);
+}
+
+.score-display {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.current-score {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.max-score {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+/* ============================================
+   REVIEW ITEM - With Prominent Decay Bar
+   ============================================ */
+
+.review-item {
+    background: var(--color-bg-card);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: var(--space-md);
+    animation: slideIn 0.5s ease forwards;
+    opacity: 0;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.review-item:hover {
+    border-color: rgba(255, 107, 157, 0.3);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.review-item-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+}
+
+.review-item .review-icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+}
+
+.review-item .review-info {
+    flex: 1;
+}
+
+.review-item .review-title {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    margin-bottom: 4px;
+}
+
+.review-item .review-meta {
+    display: flex;
+    gap: var(--space-xs);
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+.review-separator {
+    color: var(--color-text-muted);
+}
+
+.review-item .review-days {
+    font-family: var(--font-mono);
+    color: var(--color-cyan);
+}
+
+/* Score Badge */
+.score-badge {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.score-value {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+}
+
+.score-max {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* ============================================
+   DECAY BAR - Prominent Animated Horizontal Bar
+   ============================================ */
+
+.decay-bar-wrapper {
+    margin-bottom: var(--space-md);
+}
+
+.decay-bar-track {
+    position: relative;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.decay-bar-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    /* Start at 100% */
+    width: 100%;
+    background: linear-gradient(90deg, 
+        var(--bar-color) 0%, 
+        color-mix(in srgb, var(--bar-color) 80%, white) 100%
+    );
+    border-radius: 8px;
+    box-shadow: 
+        0 0 20px var(--bar-color),
+        inset 0 2px 0 rgba(255, 255, 255, 0.2);
+    transition: none;
+}
+
+/* Animated state - shrinks from 100% to target width */
+.decay-bar-fill.animate {
+    width: var(--bar-width, 100%);
+    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.decay-bar-info {
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--space-xs);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+}
+
+.bar-label {
+    color: var(--color-text);
+}
+
+.bar-decay {
+    color: var(--color-pink);
+}
+
+/* Review Tags */
+.review-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+}
+
+.tag {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    color: var(--color-cyan);
+    border: 1px solid rgba(78, 205, 196, 0.2);
+}
+
+/* Decay Legend */
+.decay-legend {
+    max-width: 600px;
+    margin: var(--space-lg) auto 0;
+}
+
+.legend-title {
+    font-size: 0.8rem;
+    margin-bottom: var(--space-xs);
+}
+
+.legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    justify-content: center;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+/* Add review hint (kept for reference) */
+.add-review-hint {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.hint-text {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+
+/* ============================================
+   10. FOOTER
+   ============================================ */
+
+.main-footer {
+    text-align: center;
+    padding: var(--space-lg) var(--space-md);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    margin-top: var(--space-xl);
+}
+
+.footer-text {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+.footer-divider {
+    margin: 0 var(--space-sm);
+    color: var(--color-pink);
+}
+
+
+/* ============================================
+   11. ANIMATIONS
+   ============================================ */
+
+@keyframes float {
+    0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    25% {
+        transform: translate(30px, -30px) rotate(5deg);
+    }
+    50% {
+        transform: translate(-20px, 20px) rotate(-5deg);
+    }
+    75% {
+        transform: translate(10px, -10px) rotate(3deg);
+    }
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Cherry blossom gentle float animation */
+@keyframes floatBlossom {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-5px) rotate(5deg);
+    }
+}
+
+
+/* ============================================
+   12. RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+    :root {
+        --space-md: 1.5rem;
+        --space-lg: 2rem;
+        --space-xl: 3rem;
+    }
+    
+    /* Allow scroll on mobile home page since content won't fit */
+    .home-page {
+        height: auto;
+        overflow: auto;
+    }
+    
+    .home-container {
+        height: auto;
+        min-height: calc(100vh - 60px);
+    }
+    
+    /* Stack columns on mobile */
+    .home-content {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--space-md);
+        padding: var(--space-md) 0;
+    }
+    
+    .home-text {
+        max-width: 100%;
+    }
+    
+    .home-visual {
+        max-width: 100%;
+    }
+    
+    /* Review items responsive */
+    .review-item-header {
+        flex-wrap: wrap;
+        gap: var(--space-sm);
+    }
+    
+    .review-item .review-icon {
+        font-size: 2rem;
+    }
+    
+    .review-item .review-title {
+        font-size: 1.1rem;
+    }
+    
+    .score-badge {
+        margin-left: auto;
+    }
+    
+    .decay-bar-track {
+        height: 32px;
+    }
+    
+    /* Grading section responsive */
+    .grading-card {
+        padding: var(--space-md);
+    }
+    
+    .category-btn {
+        font-size: 0.9rem;
+        padding: var(--space-xs) var(--space-sm);
+    }
+    
+    .formula-box code {
+        font-size: 0.9rem;
+    }
+    
+    .tier-bar {
+        height: 20px;
+    }
+    
+    .quick-links {
+        justify-content: center;
+    }
+    
+    .main-nav {
+        flex-direction: column;
+        gap: var(--space-sm);
+        padding: var(--space-sm);
+    }
+    
+    .nav-links {
+        gap: var(--space-sm);
+    }
+    
+    .welcome-gif {
+        max-width: 100%;
+    }
+    
+    .reviews-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .shape {
+        transform: scale(0.5);
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: var(--space-sm);
+    }
+    
+    .hero-title {
+        font-size: 1.8rem;
+    }
+    
+    .filter-btn {
+        font-size: 0.75rem;
+        padding: 6px 12px;
+    }
+    
+    .cherry-blossom {
+        font-size: 1.5rem;
+    }
+}
