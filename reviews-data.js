@@ -1,181 +1,143 @@
 /**
- * REVIEWS SYSTEM - Decay-Based Scoring
- * 
- * Reviews are fetched from .md files in /reviews folder.
- * Just add the filename to REVIEW_FILES array below.
- * 
+ * REVIEWS ENGINE
+ *
+ * ─────────────────────────────────────────────
+ * TO ADD A NEW REVIEW:
+ *   1. Create  reviews/your-thing.md
+ *   2. Add     your-thing.md   to  reviews/index.md
+ *   That's it — no JS or HTML changes needed.
+ * ─────────────────────────────────────────────
+ *
+ * REVIEW .md FORMAT:
+ *   ---
+ *   title: Elden Ring
+ *   category: game          ← movie | food | item | game
+ *   icon: 🎮
+ *   tags: RPG, Open World
+ *   initialScore: 10
+ *   initialDate: 2024-08-01
+ *   ---
+ *
+ *   ## History
+ *   2024-09-01 | +1
+ *   2025-01-10 | -1
+ *
  * DECAY FORMULA:
- * currentScore = (baseScore + adjustments) × (0.5)^(daysElapsed / halfLife)
+ *   score = (base + adjustments) × 0.5^(daysElapsed / halfLife)
  */
 
-// ============================================
-// CONFIGURATION
-// ============================================
-
+// ── Decay configuration ───────────────────────
+// Edit halfLife here to change how fast scores decay (days).
 const DECAY_CONFIG = {
-    halfLife: 90,        // Days for score to halve
-    maxScore: 10,        // Maximum possible score
-    minDisplayWidth: 5   // Minimum ribbon width percentage
+    halfLife:        90,
+    maxScore:        10,
+    minDisplayWidth: 5,
 };
 
-// List of review .md files to load (just add filename here!)
-const REVIEW_FILES = [
-    'inception.md',
-    'ichiran-ramen.md',
-    'sony-wh1000xm5.md',
-    'elden-ring.md',
-    'spiderverse.md',
-    'butter-chicken.md'
-];
+// ── Parse helpers ─────────────────────────────
 
-// ============================================
-// MARKDOWN PARSER
-// ============================================
+function parseIndexMd(text) {
+    return text
+        .replace(/\r\n/g, '\n')
+        .split('\n')
+        .map(l => l.trim())
+        .filter(l => l && !l.startsWith('#') && l.endsWith('.md'));
+}
 
-/**
- * Parse YAML-like frontmatter from .md file content
- */
-function parseFrontmatter(content) {
-    const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---/;
-    const match = content.match(frontmatterRegex);
-    
-    if (!match) return null;
-    
-    const frontmatter = match[1];
+function parseReviewFrontmatter(raw) {
+    const text  = raw.replace(/\r\n/g, '\n');
+    const start = text.indexOf('---\n');
+    if (start !== 0) return null;
+    const close = text.indexOf('\n---', 4);
+    if (close === -1) return null;
+
     const data = {};
-    
-    frontmatter.split('\n').forEach(line => {
-        const colonIndex = line.indexOf(':');
-        if (colonIndex > 0) {
-            const key = line.substring(0, colonIndex).trim();
-            let value = line.substring(colonIndex + 1).trim();
-            
-            // Parse numbers
-            if (key === 'initialScore') {
-                value = parseFloat(value);
-            }
-            // Parse tags as array
-            else if (key === 'tags') {
-                value = value.split(',').map(t => t.trim());
-            }
-            
-            data[key] = value;
-        }
+    text.slice(4, close).split('\n').forEach(line => {
+        const colon = line.indexOf(':');
+        if (colon < 1) return;
+        const key   = line.slice(0, colon).trim();
+        const value = line.slice(colon + 1).trim();
+        if (key === 'initialScore') data[key] = parseFloat(value);
+        else if (key === 'tags')    data[key] = value.split(',').map(t => t.trim()).filter(Boolean);
+        else                        data[key] = value;
     });
-    
     return data;
 }
 
-/**
- * Parse history entries from .md file content
- * Format: YYYY-MM-DD | +1 or -1
- */
-function parseHistory(content) {
+function parseReviewHistory(raw) {
     const history = [];
-    const historySection = content.split('## History')[1];
-    
-    if (!historySection) return history;
-    
-    const lines = historySection.split('\n');
-    const historyRegex = /^(\d{4}-\d{2}-\d{2})\s*\|\s*([+-]?\d+)/;
-    
-    lines.forEach(line => {
-        const match = line.trim().match(historyRegex);
-        if (match) {
-            history.push({
-                date: match[1],
-                change: parseInt(match[2])
-            });
-        }
+    const section = raw.replace(/\r\n/g, '\n').split('## History')[1];
+    if (!section) return history;
+    const re = /^(\d{4}-\d{2}-\d{2})\s*\|\s*([+-]?\d+)/m;
+    section.split('\n').forEach(line => {
+        const m = line.trim().match(re);
+        if (m) history.push({ date: m[1], change: parseInt(m[2]) });
     });
-    
     return history;
 }
 
-/**
- * Fetch and parse a single review .md file
- */
-async function fetchReview(filename) {
+// ── Fetch layer ───────────────────────────────
+
+async function fetchText(url) {
+    const controller = new AbortController();
+    const timer      = setTimeout(() => controller.abort(), 6000);
     try {
-        const response = await fetch(`reviews/${filename}`);
-        if (!response.ok) throw new Error(`Failed to load ${filename}`);
-        
-        const content = await response.text();
-        const data = parseFrontmatter(content);
-        
-        if (!data) throw new Error(`Invalid frontmatter in ${filename}`);
-        
-        data.id = filename.replace('.md', '');
-        data.history = parseHistory(content);
-        
-        return data;
-    } catch (error) {
-        console.error(`Error loading review ${filename}:`, error);
-        return null;
+        const res = await fetch(url, { signal: controller.signal });
+        if (!res.ok) throw new Error(`HTTP ${res.status} — ${url}`);
+        return await res.text();
+    } finally {
+        clearTimeout(timer);
     }
 }
 
-/**
- * Fetch all reviews from .md files
- */
+async function fetchReviewIndex() {
+    const text = await fetchText('reviews/index.md');
+    return parseIndexMd(text);
+}
+
+async function fetchReview(filename) {
+    const raw  = await fetchText(`reviews/${filename}`);
+    const data = parseReviewFrontmatter(raw);
+    if (!data) throw new Error(`Bad frontmatter in ${filename}`);
+    data.id      = filename.replace('.md', '');
+    data.history = parseReviewHistory(raw);
+    return data;
+}
+
 async function fetchAllReviews() {
-    const promises = REVIEW_FILES.map(file => fetchReview(file));
-    const reviews = await Promise.all(promises);
-    return reviews.filter(r => r !== null);
+    const files   = await fetchReviewIndex();
+    const results = await Promise.allSettled(files.map(f => fetchReview(f)));
+    return results
+        .filter(r => r.status === 'fulfilled')
+        .map(r => r.value)
+        .sort((a, b) => new Date(b.initialDate) - new Date(a.initialDate));
 }
 
-// ============================================
-// DECAY CALCULATIONS
-// ============================================
+// ── Decay calculations ────────────────────────
 
-/**
- * Calculate the current decayed score for a review
- */
 function calculateDecayedScore(review) {
-    const now = new Date();
-    const initialDate = new Date(review.initialDate);
-    const daysElapsed = Math.floor((now - initialDate) / (1000 * 60 * 60 * 24));
-    
-    // Calculate total adjustments from history
-    let adjustments = 0;
-    if (review.history) {
-        review.history.forEach(entry => {
-            adjustments += entry.change;
-        });
-    }
-    
-    // Base score with adjustments (capped at maxScore)
-    const baseScore = Math.min(review.initialScore + adjustments, DECAY_CONFIG.maxScore);
-    
-    // Apply exponential decay: score × (0.5)^(days / halfLife)
+    const now         = new Date();
+    const initial     = new Date(review.initialDate);
+    const daysElapsed = Math.max(0, Math.floor((now - initial) / 86400000));
+
+    const adjustments = (review.history || []).reduce((s, e) => s + e.change, 0);
+    const baseScore   = Math.min(review.initialScore + adjustments, DECAY_CONFIG.maxScore);
     const decayFactor = Math.pow(0.5, daysElapsed / DECAY_CONFIG.halfLife);
-    const currentScore = baseScore * decayFactor;
-    
-    // Calculate ribbon width (percentage of max score)
-    const ribbonWidth = Math.max(
-        (currentScore / DECAY_CONFIG.maxScore) * 100,
-        DECAY_CONFIG.minDisplayWidth
-    );
-    
-    // Decay percentage (how much has decayed)
-    const decayPercentage = ((baseScore - currentScore) / baseScore) * 100;
-    
+    const current     = baseScore * decayFactor;
+
     return {
-        currentScore: Math.round(currentScore * 10) / 10,
-        baseScore: baseScore,
-        decayPercentage: Math.round(decayPercentage),
-        ribbonWidth: Math.round(ribbonWidth),
-        daysElapsed: daysElapsed
+        currentScore:    Math.round(current * 10) / 10,
+        baseScore,
+        decayPercentage: Math.round(((baseScore - current) / baseScore) * 100),
+        ribbonWidth:     Math.max(Math.round((current / DECAY_CONFIG.maxScore) * 100), DECAY_CONFIG.minDisplayWidth),
+        daysElapsed,
     };
 }
 
-/**
- * Get color based on current score
- */
 function getScoreColor(score) {
-    if (score >= 8) return '#22c55e';      // Green - Excellent
-    if (score >= 6) return '#84cc16';      // Lime - Good
-    if (score >= 4) return '#eab308';      // Yellow - Average
-    if (score >= 2) return '#f97316';      // Orange - Below Average
-    return '#ef4444';                       // Red - Poor
+    if (score >= 8) return '#22c55e';
+    if (score >= 6) return '#84cc16';
+    if (score >= 4) return '#eab308';
+    if (score >= 2) return '#f97316';
+    return '#ef4444';
 }

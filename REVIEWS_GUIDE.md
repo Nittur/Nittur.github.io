@@ -6,10 +6,10 @@ A time-decay based review system where scores naturally decrease over time. Revi
 
 ### Adding a New Review
 
-1. Create a new `.md` file in `/reviews/` folder (e.g., `my-movie.md`)
-2. Add the filename to `REVIEW_FILES` array in `reviews-data.js`
+1. Create `/reviews/my-thing.md`
+2. Add `my-thing.md` to `/reviews/index.md` (one line)
 
-That's it! The review will appear automatically.
+That's it — no JS or HTML changes needed.
 
 ---
 

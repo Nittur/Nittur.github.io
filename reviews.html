@@ -31,6 +31,7 @@
         <ul class="nav-links">
             <li><a href="index.html">Home</a></li>
             <li><a href="reviews.html" class="active">Reviews</a></li>
+            <li><a href="blogs.html">Blog</a></li>
         </ul>
     </nav>
 
@@ -47,13 +48,8 @@
             </p>
         </section>
 
-        <!-- Category Buttons -->
-        <div class="category-bar">
-            <button class="category-btn" data-category="movie">🎬 Movies</button>
-            <button class="category-btn" data-category="food">🍜 Food</button>
-            <button class="category-btn" data-category="item">📦 Items</button>
-            <button class="category-btn" data-category="game">🎮 Games</button>
-        </div>
+        <!-- Category Buttons — built dynamically from loaded .md files -->
+        <div class="category-bar" id="category-bar"></div>
 
         <!-- Grading Info Section (shown by default) -->
         <section class="grading-info" id="grading-info">
@@ -142,24 +138,10 @@
 
     <!-- JavaScript -->
     <script>
-        // Fallback data for local testing (when fetch doesn't work)
-        const FALLBACK_REVIEWS = [
-            { title: "Inception", category: "movie", icon: "🎬", tags: ["Sci-Fi", "Thriller", "Must Watch"], initialScore: 10, initialDate: "2024-11-15", history: [] },
-            { title: "Ichiran Ramen", category: "food", icon: "🍜", tags: ["Japanese", "Ramen", "Worth It"], initialScore: 8, initialDate: "2024-10-10", history: [] },
-            { title: "Sony WH-1000XM5", category: "item", icon: "📦", tags: ["Audio", "Tech", "Daily Driver"], initialScore: 10, initialDate: "2024-09-05", history: [] },
-            { title: "Elden Ring", category: "game", icon: "🎮", tags: ["RPG", "Open World", "Challenging"], initialScore: 10, initialDate: "2024-08-01", history: [] },
-            { title: "Spider-Man: Across the Spider-Verse", category: "movie", icon: "🎬", tags: ["Animation", "Superhero", "Masterpiece"], initialScore: 10, initialDate: "2024-07-15", history: [] },
-            { title: "Homemade Butter Chicken", category: "food", icon: "🍜", tags: ["Indian", "Homemade", "Comfort Food"], initialScore: 8, initialDate: "2024-11-01", history: [] }
-        ];
-
-        const CATEGORY_NAMES = {
-            movie: '🎬 Movies',
-            food: '🍜 Food',
-            item: '📦 Items',
-            game: '🎮 Games'
-        };
-
         let allReviews = [];
+
+        // Derived from loaded reviews — no hardcoding needed
+        let categoryMeta = {}; // { category: { label, icon } }
 
         // Render reviews for a specific category
         function renderReviews(category) {
@@ -236,17 +218,43 @@
             return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
         }
 
+        // Build category buttons from whatever categories exist in the loaded reviews
+        function buildCategoryButtons() {
+            // Collect unique categories in the order they first appear
+            const seen = new Set();
+            allReviews.forEach(r => {
+                if (!seen.has(r.category)) {
+                    seen.add(r.category);
+                    // Pick the icon from the first review in that category
+                    categoryMeta[r.category] = {
+                        icon:  r.icon  || '📌',
+                        label: r.category.charAt(0).toUpperCase() + r.category.slice(1) + 's',
+                    };
+                }
+            });
+
+            const bar = document.getElementById('category-bar');
+            bar.innerHTML = [...seen].map(cat => {
+                const { icon, label } = categoryMeta[cat];
+                return `<button class="category-btn" data-category="${cat}">${icon} ${label}</button>`;
+            }).join('');
+
+            bar.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', () => showCategory(btn.dataset.category));
+            });
+        }
+
         // Show reviews for a category
         function showCategory(category) {
             document.getElementById('grading-info').style.display = 'none';
             document.getElementById('reviews-section').style.display = 'block';
-            document.getElementById('category-title').textContent = CATEGORY_NAMES[category];
-            
-            // Update active button
+            const { icon, label } = categoryMeta[category] || { icon: '', label: category };
+            document.getElementById('category-title').textContent = `${icon} ${label}`;
+
             document.querySelectorAll('.category-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.category === category);
             });
-            
+
             renderReviews(category);
         }
 
@@ -254,23 +262,14 @@
         function showGradingInfo() {
             document.getElementById('grading-info').style.display = 'block';
             document.getElementById('reviews-section').style.display = 'none';
-            
-            // Remove active from all buttons
+
             document.querySelectorAll('.category-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
         }
 
-        // Setup event listeners
+        // Setup static event listeners (back button only — category buttons are built dynamically)
         function setupEvents() {
-            // Category buttons
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    showCategory(btn.dataset.category);
-                });
-            });
-            
-            // Back button
             document.getElementById('back-btn').addEventListener('click', showGradingInfo);
         }
 
@@ -286,25 +285,23 @@
 
         // Initialize
         async function init() {
+            setupEvents();
+            animateDemoBar();
+
+            // Detect local file:// — fetch won't work
+            if (location.protocol === 'file:') {
+                document.getElementById('grading-info').querySelector('.grading-cta').innerHTML =
+                    `<span class="retro-text">// select a category above to see reviews</span>
+                     <br><small style="color:var(--color-text-muted);font-family:var(--font-mono);font-size:.75rem;">
+                     Running locally? Use a server: <code style="color:var(--color-yellow)">npx serve .</code></small>`;
+                return;
+            }
+
             try {
-                if (typeof fetchAllReviews === 'function') {
-                    allReviews = await fetchAllReviews();
-                }
-                
-                if (!allReviews || allReviews.length === 0) {
-                    allReviews = FALLBACK_REVIEWS;
-                }
-                
-                allReviews.sort((a, b) => new Date(b.initialDate) - new Date(a.initialDate));
-                
-                setupEvents();
-                animateDemoBar();
-            } catch (error) {
-                console.error('Failed to load reviews:', error);
-                allReviews = FALLBACK_REVIEWS;
-                allReviews.sort((a, b) => new Date(b.initialDate) - new Date(a.initialDate));
-                setupEvents();
-                animateDemoBar();
+                allReviews = await fetchAllReviews();
+                buildCategoryButtons();
+            } catch (err) {
+                console.error('Failed to load reviews:', err);
             }
         }
 

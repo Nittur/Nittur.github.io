@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pavan's blog - thoughts, tools, and ideas">
+    <title>Blog | Pavan</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    <script src="blog-engine.js"></script>
+</head>
+
+<body>
+    <!-- Background decorations -->
+    <div class="bg-decoration">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+        <div class="wave-pattern"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <a href="index.html" class="nav-logo">
+            <span class="logo-symbol">⛩</span>
+            <span class="logo-text">Pavan</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="reviews.html">Reviews</a></li>
+            <li><a href="blogs.html" class="active">Blog</a></li>
+        </ul>
+    </nav>
+
+    <!-- ── LISTING VIEW ──────────────────────── -->
+    <main class="container" id="view-listing">
+        <section class="page-header">
+            <span class="cherry-blossom header-blossom">✿</span>
+            <h1 class="hero-title">
+                <span class="gradient-text">Blog</span>
+            </h1>
+            <p class="hero-subtitle">
+                <span class="retro-text">// thoughts, tools, and half-formed ideas</span>
+            </p>
+        </section>
+
+        <div class="blog-listing" id="blog-listing">
+            <!-- Cards injected here -->
+            <div class="blog-loading">
+                <span class="retro-text blog-loading-text">// loading posts...</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- ── READER VIEW ───────────────────────── -->
+    <main class="container" id="view-reader" style="display:none;">
+        
+        <!-- Banner image (shown if post has one) -->
+        <div class="blog-banner" id="blog-banner" style="display:none;">
+            <img id="blog-banner-img" src="" alt="" class="blog-banner-img">
+        </div>
+
+        <article class="blog-post" id="blog-post">
+            <!-- Post header -->
+            <header class="blog-post-header">
+                <button class="blog-back-btn" id="back-btn">← All Posts</button>
+                <h1 class="blog-post-title" id="post-title"></h1>
+                <div class="blog-post-meta" id="post-meta">
+                    <span class="post-date" id="post-date"></span>
+                    <span class="post-dot">·</span>
+                    <span class="post-readtime" id="post-readtime"></span>
+                    <span class="post-dot">·</span>
+                    <div class="post-tags" id="post-tags"></div>
+                </div>
+            </header>
+
+            <!-- Rendered markdown content -->
+            <div class="blog-content" id="blog-content"></div>
+
+            <!-- Post footer -->
+            <footer class="blog-post-footer">
+                <button class="blog-back-btn" id="back-btn-footer">← All Posts</button>
+            </footer>
+        </article>
+    </main>
+
+    <footer class="main-footer" id="site-footer">
+        <p class="footer-text">
+            <span class="retro-text">2025</span>
+            <span class="footer-divider">◈</span>
+            <span class="retro-text">made with ♡</span>
+        </p>
+    </footer>
+
+    <script>
+        let allMeta = [];
+
+        // ── Routing ───────────────────────────
+        function showListing() {
+            document.getElementById('view-listing').style.display = '';
+            document.getElementById('view-reader').style.display  = 'none';
+            // Reset any post-level CSS variables
+            document.documentElement.style.removeProperty('--blog-accent');
+            document.body.style.fontFamily = '';
+            history.replaceState(null, '', 'blogs.html');
+            window.scrollTo(0, 0);
+        }
+
+        function showReader(filename) {
+            document.getElementById('view-listing').style.display = 'none';
+            document.getElementById('view-reader').style.display  = '';
+            history.replaceState(null, '', `blogs.html?post=${filename}`);
+            loadPost(filename);
+            window.scrollTo(0, 0);
+        }
+
+        // ── Listing renderer ──────────────────
+        function renderListing(posts) {
+            const el = document.getElementById('blog-listing');
+            if (!posts.length) {
+                el.innerHTML = '<p class="retro-text blog-empty">// no posts yet</p>';
+                return;
+            }
+
+            el.innerHTML = posts.map((post, i) => `
+                <article class="blog-card" 
+                         style="animation-delay: ${i * 0.08}s"
+                         data-file="${post.filename}">
+                    <div class="blog-card-body">
+                        <div class="blog-card-meta">
+                            <time class="blog-card-date">${formatBlogDate(post.date)}</time>
+                            <span class="blog-card-readtime">${post.readTime} min read</span>
+                        </div>
+                        <h2 class="blog-card-title"
+                            ${post.accent ? `style="color: ${post.accent};"` : ''}>
+                            ${post.title}
+                        </h2>
+                        <p class="blog-card-excerpt">${post.excerpt}…</p>
+                        <div class="blog-card-footer">
+                            <div class="blog-card-tags">
+                                ${post.tags.map(t => `<span class="blog-tag">${t}</span>`).join('')}
+                            </div>
+                            <span class="blog-read-link">Read →</span>
+                        </div>
+                    </div>
+                    ${post.accent ? `<div class="blog-card-accent-bar" style="background: ${post.accent};"></div>` : ''}
+                </article>
+            `).join('');
+
+            // Click to open
+            el.querySelectorAll('.blog-card').forEach(card => {
+                card.addEventListener('click', () => showReader(card.dataset.file));
+            });
+        }
+
+        // ── Post renderer ─────────────────────
+        async function loadPost(filename) {
+            const content = document.getElementById('blog-content');
+            content.innerHTML = '<span class="retro-text blog-loading-text">// loading...</span>';
+
+            try {
+                const post = await fetchBlogPost(filename);
+                applyPost(post);
+            } catch (err) {
+                content.innerHTML = `
+                    <p style="color:var(--color-text-muted);font-family:var(--font-mono);font-size:.9rem;line-height:1.8">
+                        // could not load post.<br>
+                        If you're previewing locally, run a server first:<br>
+                        <code style="color:var(--color-yellow)">npx serve .</code>
+                        &nbsp;then open <code style="color:var(--color-cyan)">http://localhost:3000</code>
+                    </p>`;
+            }
+        }
+
+        function applyPost(post) {
+            const content = document.getElementById('blog-content');
+
+            // Per-post accent colour
+            const accent = post.accent || null;
+            if (accent) {
+                document.documentElement.style.setProperty('--blog-accent', accent);
+            } else {
+                document.documentElement.style.removeProperty('--blog-accent');
+            }
+
+            // Per-post font
+            const fontStack = BLOG_FONTS[post.font] || BLOG_FONTS.sans;
+            document.getElementById('blog-post').style.fontFamily = fontStack;
+
+            // Banner
+            const bannerEl  = document.getElementById('blog-banner');
+            const bannerImg = document.getElementById('blog-banner-img');
+            if (post.banner) {
+                bannerImg.src = post.banner;
+                bannerImg.alt = post.title;
+                bannerEl.style.display = '';
+            } else {
+                bannerEl.style.display = 'none';
+            }
+
+            // Header fields
+            document.getElementById('post-title').textContent   = post.title;
+            document.getElementById('post-date').textContent    = formatBlogDate(post.date);
+            document.getElementById('post-readtime').textContent = `${post.readTime} min read`;
+            document.getElementById('post-tags').innerHTML =
+                (post.tags || []).map(t => `<span class="blog-tag">${t}</span>`).join('');
+
+            // Layout
+            document.getElementById('blog-post').dataset.layout = post.layout || 'wide';
+
+            // Rendered content
+            content.innerHTML = post.html;
+        }
+
+        // ── Back buttons ──────────────────────
+        document.getElementById('back-btn').addEventListener('click', showListing);
+        document.getElementById('back-btn-footer').addEventListener('click', showListing);
+
+        // ── Init ──────────────────────────────
+        async function init() {
+            const listing = document.getElementById('blog-listing');
+
+            // Detect local file:// — fetch can't work
+            if (location.protocol === 'file:') {
+                listing.innerHTML = `
+                    <div class="zen-card small" style="text-align:center;padding:var(--space-xl)">
+                        <p style="font-family:var(--font-mono);color:var(--color-text-muted);line-height:2">
+                            // local file preview — fetch is blocked by the browser<br>
+                            Start a local server to see your posts:<br>
+                            <code style="color:var(--color-yellow)">npx serve .</code>
+                            &nbsp;then open&nbsp;
+                            <code style="color:var(--color-cyan)">http://localhost:3000/blogs.html</code>
+                        </p>
+                    </div>`;
+                return;
+            }
+
+            try {
+                allMeta = await fetchAllBlogMeta();
+                renderListing(allMeta);
+            } catch (err) {
+                console.error('Failed to load blog index:', err);
+                listing.innerHTML =
+                    '<p class="retro-text blog-empty">// could not load posts — check console</p>';
+            }
+
+            // Deep-link: ?post=filename.md
+            const postFile = new URLSearchParams(location.search).get('post');
+            if (postFile) showReader(postFile);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
