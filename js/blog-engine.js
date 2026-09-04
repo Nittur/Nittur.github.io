@@ -3,8 +3,8 @@
  *
  * ─────────────────────────────────────────────
  * TO ADD A NEW POST:
- *   1. Create  blogs/my-post.md
- *   2. Add     my-post.md   to  blogs/index.md
+ *   1. Create  content/blogs/my-post.md
+ *   2. Add     my-post.md   to  content/blogs/index.md
  *   That's it — no JS or HTML changes needed.
  * ─────────────────────────────────────────────
  *
@@ -235,7 +235,7 @@ async function fetchText(url) {
 }
 
 async function fetchBlogIndex() {
-    const text = await fetchText('blogs/index.md');
+    const text = await fetchText('content/blogs/index.md');
     return parseIndexMd(text);
 }
 
@@ -243,7 +243,7 @@ async function fetchAllBlogMeta() {
     const files   = await fetchBlogIndex();
     const results = await Promise.allSettled(
         files.map(async filename => {
-            const raw            = await fetchText(`blogs/${filename}`);
+            const raw            = await fetchText(`content/blogs/${filename}`);
             const { meta, body } = parseFrontmatter(raw);
             const words          = body.trim().split(/\s+/).length;
             const readTime       = Math.max(1, Math.round(words / 200));
@@ -271,7 +271,7 @@ async function fetchAllBlogMeta() {
 }
 
 async function fetchBlogPost(filename) {
-    const raw            = await fetchText(`blogs/${filename}`);
+    const raw            = await fetchText(`content/blogs/${filename}`);
     const { meta, body } = parseFrontmatter(raw);
     const words          = body.trim().split(/\s+/).length;
     return {

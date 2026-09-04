@@ -1,13 +1,13 @@
 # Blog Guide
 
-Write posts as `.md` files in `/blogs/`, then add the filename to `/blogs/index.md`. No JS or HTML edits needed.
+Write posts as `.md` files in `content/blogs/`, then add the filename to `content/blogs/index.md`. No JS or HTML edits needed.
 
 ---
 
 ## Creating a Post
 
-1. Create `/blogs/my-post-title.md`
-2. Add `my-post-title.md` to `/blogs/index.md` (one line)
+1. Create `content/blogs/my-post-title.md`
+2. Add `my-post-title.md` to `content/blogs/index.md` (one line)
 
 Done — no JS or HTML changes needed.
 
@@ -38,7 +38,7 @@ Your content here...
 | `tags`   | `tag1, tag2`                  | Tag pills on card and post |
 | `font`   | `sans` `mono` `serif`         | Body font for the post |
 | `accent` | `#hexcolor`                   | Color for headings, links, card title bar |
-| `banner` | URL or `blogs/image.jpg`      | Full-width hero image at top |
+| `banner` | URL or `images/image.jpg`      | Full-width hero image at top |
 | `layout` | `wide` `narrow`               | Content width (default: `wide`) |
 | `excerpt`| any text                      | Custom listing excerpt (else uses first paragraph) |
 
@@ -166,14 +166,14 @@ Three paragraphs of actual content...
 
 ---
 
-## Register in blog-engine.js
+## Registering Posts
 
-```javascript
-const BLOG_FILES = [
-    'on-decay.md',
-    'tools-i-use.md',
-    'my-new-post.md',  // ← add here
-];
+Posts are auto-discovered from `content/blogs/index.md`. Add your filename there (one per line):
+
+```
+on-decay.md
+sartre.md
+my-new-post.md
 ```
 
 Posts are sorted by `date` (newest first).
@@ -185,11 +185,14 @@ Posts are sorted by `date` (newest first).
 ```
 /
 ├── blogs.html           # Listing + reader (single page)
-├── blog-engine.js       # MD parser, fetch layer, file list
-└── blogs/
-    ├── on-decay.md
-    ├── tools-i-use.md
-    └── your-post.md
+├── js/
+│   ├── blog-engine.js   # MD parser + fetch layer
+│   └── blogs-main.js    # UI rendering + routing
+└── content/
+    └── blogs/
+        ├── index.md     # Lists post files
+        ├── on-decay.md
+        └── your-post.md
 ```
 
 ---

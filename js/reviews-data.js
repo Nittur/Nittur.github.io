@@ -3,8 +3,8 @@
  *
  * ─────────────────────────────────────────────
  * TO ADD A NEW CATEGORY:
- *   1. Create  reviews/your-category.md
- *   2. Add     your-category.md   to  reviews/index.md
+ *   1. Create  content/reviews/your-category.md
+ *   2. Add     your-category.md   to  content/reviews/index.md
  *   That's it — no JS or HTML changes needed.
  * ─────────────────────────────────────────────
  *
@@ -86,12 +86,12 @@ async function fetchText(url) {
 }
 
 async function fetchReviewIndex() {
-    const text = await fetchText('reviews/index.md');
+    const text = await fetchText('content/reviews/index.md');
     return parseIndexMd(text);
 }
 
 async function fetchCategory(filename) {
-    const raw  = await fetchText(`reviews/${filename}`);
+    const raw  = await fetchText(`content/reviews/${filename}`);
     const data = parseCategoryFrontmatter(raw);
     if (!data) throw new Error(`Bad frontmatter in ${filename}`);
 

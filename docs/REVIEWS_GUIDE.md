@@ -6,8 +6,8 @@ A lightweight review system where you provide scores directly. Reviews are loade
 
 ### Adding a New Category
 
-1. Create `/reviews/my-category.md`
-2. Add `my-category.md` to `/reviews/index.md` (one line)
+1. Create `content/reviews/my-category.md`
+2. Add `my-category.md` to `content/reviews/index.md` (one line)
 
 That's it — no JS or HTML changes needed.
 
@@ -72,20 +72,24 @@ Example cases:
 ```
 /
 ├── reviews.html          # Auto-renders from .md files
-├── reviews-data.js       # Loader (fetch + parse only)
-├── styles.css            # Styling + animations
-└── reviews/              # One .md file per category
-    ├── index.md          # Lists category files
-    ├── movies.md
-    ├── games.md
-    └── ...
+├── css/
+│   └── styles.css        # Styling + animations
+├── js/
+│   ├── reviews-data.js   # Loader (fetch + parse only)
+│   └── reviews-main.js   # UI rendering + interactions
+└── content/
+    └── reviews/          # One .md file per category
+        ├── index.md      # Lists category files
+        ├── movies.md
+        ├── games.md
+        └── ...
 ```
 
 ---
 
 ## Adding Files to Load
 
-Category files are auto-discovered from `reviews/index.md`. Add your filename there (one per line):
+Category files are auto-discovered from `content/reviews/index.md`. Add your filename there (one per line):
 
 ```
 movies.md
