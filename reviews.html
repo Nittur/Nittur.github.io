@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Pavan's reviews of movies, food, items, and more - with time-decay scoring">
+    <meta name="color-scheme" content="dark">
+    <meta name="description" content="Pavan's reviews of movies, food, items, and more">
     <title>Reviews | Pavan</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +15,7 @@
 
 <body>
     <!-- Background decorations -->
-    <div class="bg-decoration">
+    <div class="bg-decoration" data-darkreader-ignore>
         <div class="shape shape-1"></div>
         <div class="shape shape-2"></div>
         <div class="shape shape-3"></div>
@@ -44,81 +45,15 @@
                 My <span class="gradient-text">Reviews</span>
             </h1>
             <p class="hero-subtitle">
-                <span class="retro-text">// scores decay over time - freshness matters</span>
+                <span class="retro-text">// movies, games, and everything in between</span>
             </p>
         </section>
 
         <!-- Category Buttons — built dynamically from loaded .md files -->
         <div class="category-bar" id="category-bar"></div>
 
-        <!-- Grading Info Section (shown by default) -->
-        <section class="grading-info" id="grading-info">
-            <div class="zen-card grading-card">
-                <h2 class="grading-title">
-                    <span class="retro-text">// how i grade</span>
-                </h2>
-                
-                <div class="grading-section">
-                    <h3>The Decay Formula</h3>
-                    <div class="formula-box">
-                        <code>score = (base + adjustments) × 0.5<sup>(days / 90)</sup></code>
-                    </div>
-                    <p>Scores naturally decay over time. A perfect 10 today becomes a 5 after 90 days. This reflects how impressions fade and keeps reviews fresh.</p>
-                </div>
-
-                <div class="grading-section">
-                    <h3>Score Adjustments</h3>
-                    <p>When my opinion changes, I add <code>+1</code> or <code>-1</code> adjustments. These modify the base score before decay applies.</p>
-                </div>
-
-                <div class="grading-section">
-                    <h3>Score Colors</h3>
-                    <div class="score-scale">
-                        <div class="score-tier">
-                            <span class="tier-bar" style="background: #22c55e; width: 100%;"></span>
-                            <span class="tier-label">8-10 Excellent</span>
-                        </div>
-                        <div class="score-tier">
-                            <span class="tier-bar" style="background: #84cc16; width: 80%;"></span>
-                            <span class="tier-label">6-8 Good</span>
-                        </div>
-                        <div class="score-tier">
-                            <span class="tier-bar" style="background: #eab308; width: 60%;"></span>
-                            <span class="tier-label">4-6 Average</span>
-                        </div>
-                        <div class="score-tier">
-                            <span class="tier-bar" style="background: #f97316; width: 40%;"></span>
-                            <span class="tier-label">2-4 Below Average</span>
-                        </div>
-                        <div class="score-tier">
-                            <span class="tier-bar" style="background: #ef4444; width: 20%;"></span>
-                            <span class="tier-label">0-2 Poor</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grading-section">
-                    <h3>The Decay Bar</h3>
-                    <p>Each review has a horizontal bar that shows the current score. Watch it animate from full width down to the decayed value!</p>
-                    <div class="demo-bar">
-                        <div class="demo-bar-track">
-                            <div class="demo-bar-fill"></div>
-                        </div>
-                        <span class="demo-label">Example: 10 → 6.5 after 60 days</span>
-                    </div>
-                </div>
-
-                <p class="grading-cta">
-                    <span class="retro-text">// select a category above to see reviews</span>
-                </p>
-            </div>
-        </section>
-
-        <!-- Reviews Container (hidden by default) -->
+        <!-- Reviews Container -->
         <section class="reviews-section" id="reviews-section" style="display: none;">
-            <button class="back-btn" id="back-btn">
-                ← Back to grading info
-            </button>
             <h2 class="category-title" id="category-title"></h2>
             <div class="reviews-list" id="reviews-container">
                 <!-- Reviews will be rendered here by JavaScript -->
@@ -130,7 +65,7 @@
     <!-- Footer -->
     <footer class="main-footer">
         <p class="footer-text">
-            <span class="retro-text">2025</span>
+            <span class="retro-text">2026</span>
             <span class="footer-divider">◈</span>
             <span class="retro-text">made with ♡</span>
         </p>
@@ -156,9 +91,6 @@
             }
 
             filtered.forEach((review, index) => {
-                const decay = calculateDecayedScore(review);
-                const color = getScoreColor(decay.currentScore);
-                
                 const card = document.createElement('div');
                 card.className = 'review-item';
                 card.style.animationDelay = `${index * 0.1}s`;
@@ -168,54 +100,24 @@
                         <span class="review-icon">${review.icon}</span>
                         <div class="review-info">
                             <h3 class="review-title">${review.title}</h3>
-                            <div class="review-meta">
-                                <span class="review-date">${formatDate(review.initialDate)}</span>
-                                <span class="review-separator">•</span>
-                                <span class="review-days">${decay.daysElapsed} days ago</span>
-                            </div>
+                            ${review.date ? `<span class="review-date">${formatReviewDate(review.date)}</span>` : ''}
                         </div>
-                        <div class="score-badge" style="background: ${color};">
-                            <span class="score-value">${decay.currentScore}</span>
+                        <div class="score-badge">
+                            <span class="score-value">${review.score}</span>
                             <span class="score-max">/10</span>
                         </div>
-                    </div>
-                    
-                    <!-- DECAY BAR - Animated horizontal bar -->
-                    <div class="decay-bar-wrapper">
-                        <div class="decay-bar-track">
-                            <div class="decay-bar-fill" 
-                                 style="--bar-color: ${color}; --bar-width: ${decay.ribbonWidth}%;">
-                            </div>
-                        </div>
-                        <div class="decay-bar-info">
-                            <span class="bar-label">Base: ${decay.baseScore}/10</span>
-                            <span class="bar-decay">Decayed: ${decay.decayPercentage}%</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Tags -->
-                    <div class="review-tags">
-                        ${review.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                     </div>
                 `;
                 
                 container.appendChild(card);
             });
-
-            // Trigger ribbon animations
-            setTimeout(() => {
-                document.querySelectorAll('.decay-bar-fill').forEach((bar, i) => {
-                    setTimeout(() => {
-                        bar.classList.add('animate');
-                    }, i * 150);
-                });
-            }, 300);
         }
 
-        // Format date
-        function formatDate(dateStr) {
+        // Format review date
+        function formatReviewDate(dateStr) {
             const date = new Date(dateStr);
-            return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            if (isNaN(date)) return dateStr;
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
 
         // Build category buttons from whatever categories exist in the loaded reviews
@@ -246,7 +148,6 @@
 
         // Show reviews for a category
         function showCategory(category) {
-            document.getElementById('grading-info').style.display = 'none';
             document.getElementById('reviews-section').style.display = 'block';
             const { icon, label } = categoryMeta[category] || { icon: '', label: category };
             document.getElementById('category-title').textContent = `${icon} ${label}`;
@@ -258,42 +159,13 @@
             renderReviews(category);
         }
 
-        // Show grading info (home state)
-        function showGradingInfo() {
-            document.getElementById('grading-info').style.display = 'block';
-            document.getElementById('reviews-section').style.display = 'none';
-
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-        }
-
-        // Setup static event listeners (back button only — category buttons are built dynamically)
-        function setupEvents() {
-            document.getElementById('back-btn').addEventListener('click', showGradingInfo);
-        }
-
-        // Animate demo bar on grading page
-        function animateDemoBar() {
-            const demoFill = document.querySelector('.demo-bar-fill');
-            if (demoFill) {
-                setTimeout(() => {
-                    demoFill.classList.add('animate');
-                }, 500);
-            }
-        }
-
         // Initialize
         async function init() {
-            setupEvents();
-            animateDemoBar();
-
             // Detect local file:// — fetch won't work
             if (location.protocol === 'file:') {
-                document.getElementById('grading-info').querySelector('.grading-cta').innerHTML =
-                    `<span class="retro-text">// select a category above to see reviews</span>
-                     <br><small style="color:var(--color-text-muted);font-family:var(--font-mono);font-size:.75rem;">
-                     Running locally? Use a server: <code style="color:var(--color-yellow)">npx serve .</code></small>`;
+                document.getElementById('category-bar').innerHTML =
+                    `<span class="retro-text" style="font-family:var(--font-mono);color:var(--color-text-muted);font-size:.85rem;">
+                     Running locally? Use a server: <code style="color:var(--color-yellow)">npx serve .</code></span>`;
                 return;
             }
 

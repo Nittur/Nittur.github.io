@@ -1,13 +1,13 @@
 # Reviews System Guide
 
-A time-decay based review system where scores naturally decrease over time. Reviews are loaded directly from `.md` files.
+A lightweight review system where you provide scores directly. Reviews are loaded from `.md` files — one file per category, no calculations involved.
 
 ## Quick Start
 
-### Adding a New Review
+### Adding a New Category
 
-1. Create `/reviews/my-thing.md`
-2. Add `my-thing.md` to `/reviews/index.md` (one line)
+1. Create `/reviews/my-category.md`
+2. Add `my-category.md` to `/reviews/index.md` (one line)
 
 That's it — no JS or HTML changes needed.
 
@@ -15,31 +15,46 @@ That's it — no JS or HTML changes needed.
 
 ## .md File Format
 
+Each category gets its own file. The frontmatter defines the category, and each body line is a single review item.
+
 ```markdown
 ---
-title: Movie Title
 category: movie
 icon: 🎬
-tags: Tag1, Tag2, Tag3
-initialScore: 9
-initialDate: 2025-01-15
 ---
 
-## History
-2025-01-20 | +1
-2025-01-25 | -1
+- Inception | 10 | 2025-01-15
+- Interstellar | 8.5 | 2025-02-01
 ```
 
-### Fields
+### Frontmatter Fields
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `title` | Yes | Display name |
 | `category` | Yes | `movie`, `food`, `item`, or `game` |
 | `icon` | Yes | Emoji: 🎬 🍜 📦 🎮 |
-| `tags` | Yes | Comma-separated tags |
-| `initialScore` | Yes | Starting score (0-10) |
-| `initialDate` | Yes | YYYY-MM-DD format |
+
+### Item Line Format
+
+Each review is a single bullet line:
+
+```
+- <Title> | <Score> | <YYYY-MM-DD>
+```
+
+| Part | Required | Description |
+|------|----------|-------------|
+| `Title` | Yes | Display name |
+| `Score` | Yes | Your score (0-10, decimals allowed) |
+| `Date` | No | Review date (YYYY-MM-DD) |
+
+Example cases:
+
+```
+- Elden Ring | 10 | 2024-08-01
+- Interstellar | 8.5 | 2025-02-01
+- No Date Thing | 7
+```
 
 ### Categories & Icons
 
@@ -52,64 +67,17 @@ initialDate: 2025-01-15
 
 ---
 
-## Adjusting Scores (+1 / -1)
-
-When your opinion changes, add a line under `## History`:
-
-```
-2025-01-26 | +1
-```
-
-or
-
-```
-2025-01-26 | -1
-```
-
-- Each adjustment modifies the base score before decay applies
-- Total score is capped at 10
-
----
-
-## Decay Formula
-
-```
-currentScore = (baseScore + adjustments) × 0.5^(daysElapsed / 90)
-```
-
-- Score halves every 90 days
-- The ribbon animates from 100% to the decayed width
-- Colors indicate score tier:
-  - Green (8-10): Excellent
-  - Lime (6-8): Good  
-  - Yellow (4-6): Average
-  - Orange (2-4): Below Average
-  - Red (0-2): Poor
-
-### Customize Decay Speed
-
-In `reviews-data.js`, change `halfLife`:
-
-```javascript
-const DECAY_CONFIG = {
-    halfLife: 90,  // Change this (30 = fast, 365 = slow)
-    maxScore: 10,
-    minDisplayWidth: 5
-};
-```
-
----
-
 ## File Structure
 
 ```
 /
 ├── reviews.html          # Auto-renders from .md files
-├── reviews-data.js       # Config + file list + functions
+├── reviews-data.js       # Loader (fetch + parse only)
 ├── styles.css            # Styling + animations
-└── reviews/              # Your review .md files
-    ├── inception.md
-    ├── elden-ring.md
+└── reviews/              # One .md file per category
+    ├── index.md          # Lists category files
+    ├── movies.md
+    ├── games.md
     └── ...
 ```
 
@@ -117,12 +85,12 @@ const DECAY_CONFIG = {
 
 ## Adding Files to Load
 
-In `reviews-data.js`, add your filename:
+Category files are auto-discovered from `reviews/index.md`. Add your filename there (one per line):
 
-```javascript
-const REVIEW_FILES = [
-    'inception.md',
-    'my-new-review.md',  // Add here
-    // ...
-];
 ```
+movies.md
+games.md
+my-category.md
+```
+
+No additional config needed.

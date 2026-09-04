@@ -1,38 +1,24 @@
 /**
- * REVIEWS ENGINE
+ * REVIEWS LOADER — Minimal, no calculations
  *
  * ─────────────────────────────────────────────
- * TO ADD A NEW REVIEW:
- *   1. Create  reviews/your-thing.md
- *   2. Add     your-thing.md   to  reviews/index.md
+ * TO ADD A NEW CATEGORY:
+ *   1. Create  reviews/your-category.md
+ *   2. Add     your-category.md   to  reviews/index.md
  *   That's it — no JS or HTML changes needed.
  * ─────────────────────────────────────────────
  *
- * REVIEW .md FORMAT:
+ * CATEGORY .md FORMAT:
  *   ---
- *   title: Elden Ring
- *   category: game          ← movie | food | item | game
- *   icon: 🎮
- *   tags: RPG, Open World
- *   initialScore: 10
- *   initialDate: 2024-08-01
+ *   category: movie          ← movie | food | item | game
+ *   icon: 🎬
  *   ---
  *
- *   ## History
- *   2024-09-01 | +1
- *   2025-01-10 | -1
+ *   - Inception | 10 | 2025-01-15
+ *   - Interstellar | 8.5 | 2025-02-01
  *
- * DECAY FORMULA:
- *   score = (base + adjustments) × 0.5^(daysElapsed / halfLife)
+ * Each body line is one review:  - <title> | <score> | <YYYY-MM-DD>
  */
-
-// ── Decay configuration ───────────────────────
-// Edit halfLife here to change how fast scores decay (days).
-const DECAY_CONFIG = {
-    halfLife:        90,
-    maxScore:        10,
-    minDisplayWidth: 5,
-};
 
 // ── Parse helpers ─────────────────────────────
 
@@ -44,7 +30,7 @@ function parseIndexMd(text) {
         .filter(l => l && !l.startsWith('#') && l.endsWith('.md'));
 }
 
-function parseReviewFrontmatter(raw) {
+function parseCategoryFrontmatter(raw) {
     const text  = raw.replace(/\r\n/g, '\n');
     const start = text.indexOf('---\n');
     if (start !== 0) return null;
@@ -57,23 +43,32 @@ function parseReviewFrontmatter(raw) {
         if (colon < 1) return;
         const key   = line.slice(0, colon).trim();
         const value = line.slice(colon + 1).trim();
-        if (key === 'initialScore') data[key] = parseFloat(value);
-        else if (key === 'tags')    data[key] = value.split(',').map(t => t.trim()).filter(Boolean);
-        else                        data[key] = value;
+        data[key] = value;
     });
+    // Body is everything after the closing ---
+    data.body = text.slice(close + 4);
     return data;
 }
 
-function parseReviewHistory(raw) {
-    const history = [];
-    const section = raw.replace(/\r\n/g, '\n').split('## History')[1];
-    if (!section) return history;
-    const re = /^(\d{4}-\d{2}-\d{2})\s*\|\s*([+-]?\d+)/m;
-    section.split('\n').forEach(line => {
-        const m = line.trim().match(re);
-        if (m) history.push({ date: m[1], change: parseInt(m[2]) });
+// Parse review lines: "- Title | score | YYYY-MM-DD"
+function parseCategoryItems(raw, category, icon) {
+    const items = [];
+    raw.replace(/\r\n/g, '\n').split('\n').forEach(line => {
+        const m = line.trim().match(/^-\s*(.+)$/);
+        if (!m) return;
+
+        const parts = m[1].split('|').map(p => p.trim());
+        if (parts.length < 2) return;
+
+        const title = parts[0];
+        const score = parseFloat(parts[1]);
+        const date  = parts[2] || '';
+
+        if (title && !isNaN(score)) {
+            items.push({ title, score, date, category, icon });
+        }
     });
-    return history;
+    return items;
 }
 
 // ── Fetch layer ───────────────────────────────
@@ -95,49 +90,22 @@ async function fetchReviewIndex() {
     return parseIndexMd(text);
 }
 
-async function fetchReview(filename) {
+async function fetchCategory(filename) {
     const raw  = await fetchText(`reviews/${filename}`);
-    const data = parseReviewFrontmatter(raw);
+    const data = parseCategoryFrontmatter(raw);
     if (!data) throw new Error(`Bad frontmatter in ${filename}`);
-    data.id      = filename.replace('.md', '');
-    data.history = parseReviewHistory(raw);
-    return data;
+
+    const category = data.category || filename.replace('.md', '');
+    const icon     = data.icon     || '📌';
+    return parseCategoryItems(data.body, category, icon);
 }
 
 async function fetchAllReviews() {
     const files   = await fetchReviewIndex();
-    const results = await Promise.allSettled(files.map(f => fetchReview(f)));
-    return results
+    const results = await Promise.allSettled(files.map(f => fetchCategory(f)));
+    const items   = [];
+    results
         .filter(r => r.status === 'fulfilled')
-        .map(r => r.value)
-        .sort((a, b) => new Date(b.initialDate) - new Date(a.initialDate));
-}
-
-// ── Decay calculations ────────────────────────
-
-function calculateDecayedScore(review) {
-    const now         = new Date();
-    const initial     = new Date(review.initialDate);
-    const daysElapsed = Math.max(0, Math.floor((now - initial) / 86400000));
-
-    const adjustments = (review.history || []).reduce((s, e) => s + e.change, 0);
-    const baseScore   = Math.min(review.initialScore + adjustments, DECAY_CONFIG.maxScore);
-    const decayFactor = Math.pow(0.5, daysElapsed / DECAY_CONFIG.halfLife);
-    const current     = baseScore * decayFactor;
-
-    return {
-        currentScore:    Math.round(current * 10) / 10,
-        baseScore,
-        decayPercentage: Math.round(((baseScore - current) / baseScore) * 100),
-        ribbonWidth:     Math.max(Math.round((current / DECAY_CONFIG.maxScore) * 100), DECAY_CONFIG.minDisplayWidth),
-        daysElapsed,
-    };
-}
-
-function getScoreColor(score) {
-    if (score >= 8) return '#22c55e';
-    if (score >= 6) return '#84cc16';
-    if (score >= 4) return '#eab308';
-    if (score >= 2) return '#f97316';
-    return '#ef4444';
+        .forEach(r => items.push(...r.value));
+    return items;
 }

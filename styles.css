@@ -31,6 +31,8 @@
    ============================================ */
 
 :root {
+    color-scheme: dark;
+
     /* === HOLI-INSPIRED COLOR PALETTE === */
     --color-pink: #FF6B9D;
     --color-orange: #FF8E53;
@@ -96,7 +98,6 @@ body {
         #1a1a2e 50%,
         #0f0f23 100%
     );
-    background-attachment: fixed;
 }
 
 a {
@@ -652,158 +653,12 @@ img {
 }
 
 /* ============================================
-   GRADING INFO SECTION
-   ============================================ */
-
-.grading-info {
-    max-width: 700px;
-    margin: 0 auto;
-}
-
-.grading-card {
-    padding: var(--space-lg);
-}
-
-.grading-title {
-    font-size: 1.5rem;
-    margin-bottom: var(--space-lg);
-    text-align: center;
-}
-
-.grading-section {
-    margin-bottom: var(--space-lg);
-}
-
-.grading-section h3 {
-    font-family: var(--font-heading);
-    font-size: 1.1rem;
-    color: var(--color-cyan);
-    margin-bottom: var(--space-sm);
-}
-
-.grading-section p {
-    color: var(--color-text-muted);
-    line-height: 1.8;
-}
-
-.grading-section code {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-family: var(--font-mono);
-    color: var(--color-yellow);
-}
-
-.formula-box {
-    background: rgba(0, 0, 0, 0.3);
-    padding: var(--space-md);
-    border-radius: var(--border-radius);
-    margin-bottom: var(--space-sm);
-    text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.formula-box code {
-    font-size: 1.1rem;
-    background: none;
-    padding: 0;
-}
-
-/* Score Scale Visual */
-.score-scale {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-    margin-top: var(--space-sm);
-}
-
-.score-tier {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-}
-
-.tier-bar {
-    height: 24px;
-    border-radius: 4px;
-    box-shadow: 0 0 10px currentColor;
-}
-
-.tier-label {
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    color: var(--color-text-muted);
-    white-space: nowrap;
-}
-
-/* Demo Bar */
-.demo-bar {
-    margin-top: var(--space-sm);
-}
-
-.demo-bar-track {
-    height: 36px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 6px;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.demo-bar-fill {
-    height: 100%;
-    width: 100%;
-    background: linear-gradient(90deg, #84cc16, #22c55e);
-    border-radius: 6px;
-    box-shadow: 0 0 15px #84cc16;
-    transition: none;
-}
-
-.demo-bar-fill.animate {
-    width: 65%;
-    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.demo-label {
-    display: block;
-    margin-top: var(--space-xs);
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--color-text-muted);
-    text-align: center;
-}
-
-.grading-cta {
-    text-align: center;
-    margin-top: var(--space-lg);
-    padding-top: var(--space-md);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* ============================================
    REVIEWS SECTION
    ============================================ */
 
 .reviews-section {
     max-width: 800px;
     margin: 0 auto;
-}
-
-.back-btn {
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    padding: var(--space-xs) var(--space-sm);
-    background: transparent;
-    border: 1px solid var(--color-text-muted);
-    border-radius: var(--border-radius);
-    color: var(--color-text-muted);
-    cursor: pointer;
-    transition: all var(--transition-speed);
-    margin-bottom: var(--space-md);
-}
-
-.back-btn:hover {
-    border-color: var(--color-pink);
-    color: var(--color-pink);
 }
 
 .category-title {
@@ -819,47 +674,7 @@ img {
     color: var(--color-text-muted);
 }
 
-/* Old filter styles - kept for compatibility */
-.filter-bar {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--space-xs);
-    margin-bottom: var(--space-lg);
-    padding: var(--space-sm);
-}
-
-.filter-btn {
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    padding: var(--space-xs) var(--space-sm);
-    border: 1px solid var(--color-text-muted);
-    border-radius: 50px;
-    background: transparent;
-    color: var(--color-text);
-    cursor: pointer;
-    transition: all var(--transition-speed);
-}
-
-.filter-btn:hover {
-    border-color: var(--color-pink);
-    color: var(--color-pink);
-}
-
-.filter-btn.active {
-    background: var(--color-pink);
-    border-color: var(--color-pink);
-    color: white;
-}
-
-.reviews-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: var(--space-md);
-    margin-bottom: var(--space-lg);
-}
-
-/* Reviews List Layout - vertical cards with prominent ribbons */
+/* Reviews List Layout - vertical cards */
 .reviews-list {
     display: flex;
     flex-direction: column;
@@ -871,118 +686,7 @@ img {
 }
 
 /* ============================================
-   DECAY RIBBON SYSTEM
-   Visualizes score decay over time
-   ============================================ */
-
-.decay-info {
-    max-width: 600px;
-    margin: 0 auto var(--space-md);
-    text-align: center;
-}
-
-.formula-text {
-    font-size: 0.9rem;
-    margin-bottom: var(--space-xs);
-}
-
-.formula-text code {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-family: var(--font-mono);
-    color: var(--color-yellow);
-    margin-left: var(--space-xs);
-}
-
-.formula-hint {
-    font-size: 0.8rem;
-    color: var(--color-text-muted);
-}
-
-/* Updated Review Card for Decay System */
-.review-card {
-    background: var(--color-bg-card);
-    border-radius: var(--border-radius);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    overflow: hidden;
-    transition: all var(--transition-speed);
-    padding: var(--space-sm);
-    /* Fade in animation */
-    animation: cardFadeIn 0.5s ease forwards;
-    opacity: 0;
-}
-
-@keyframes cardFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.review-card:hover {
-    border-color: rgba(255, 107, 157, 0.3);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
-
-.review-header {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    margin-bottom: var(--space-sm);
-}
-
-.review-icon {
-    font-size: 2rem;
-    flex-shrink: 0;
-}
-
-.review-info {
-    flex: 1;
-}
-
-.review-title {
-    font-family: var(--font-heading);
-    font-size: 1.1rem;
-    margin-bottom: 4px;
-}
-
-.review-meta {
-    display: flex;
-    gap: var(--space-sm);
-    font-size: 0.8rem;
-    color: var(--color-text-muted);
-}
-
-.review-days {
-    font-family: var(--font-mono);
-    color: var(--color-cyan);
-}
-
-.score-display {
-    text-align: right;
-    flex-shrink: 0;
-}
-
-.current-score {
-    font-family: var(--font-heading);
-    font-size: 1.8rem;
-    font-weight: 700;
-}
-
-.max-score {
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    color: var(--color-text-muted);
-}
-
-/* ============================================
-   REVIEW ITEM - With Prominent Decay Bar
+   REVIEW ITEM
    ============================================ */
 
 .review-item {
@@ -1014,7 +718,6 @@ img {
     display: flex;
     align-items: center;
     gap: var(--space-md);
-    margin-bottom: var(--space-md);
 }
 
 .review-item .review-icon {
@@ -1032,29 +735,17 @@ img {
     margin-bottom: 4px;
 }
 
-.review-item .review-meta {
-    display: flex;
-    gap: var(--space-xs);
-    font-size: 0.85rem;
-    color: var(--color-text-muted);
-}
-
-.review-separator {
-    color: var(--color-text-muted);
-}
-
-.review-item .review-days {
+.review-item .review-date {
     font-family: var(--font-mono);
-    color: var(--color-cyan);
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
 }
 
-/* Score Badge */
+/* Score - minimal plain number */
 .score-badge {
     display: flex;
     align-items: baseline;
-    gap: 2px;
-    padding: var(--space-xs) var(--space-sm);
-    border-radius: 8px;
+    gap: 4px;
     flex-shrink: 0;
 }
 
@@ -1062,134 +753,14 @@ img {
     font-family: var(--font-heading);
     font-size: 1.5rem;
     font-weight: 700;
-    color: white;
+    color: var(--color-text);
 }
 
 .score-max {
     font-family: var(--font-mono);
     font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.7);
-}
-
-/* ============================================
-   DECAY BAR - Prominent Animated Horizontal Bar
-   ============================================ */
-
-.decay-bar-wrapper {
-    margin-bottom: var(--space-md);
-}
-
-.decay-bar-track {
-    position: relative;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.decay-bar-fill {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    /* Start at 100% */
-    width: 100%;
-    background: linear-gradient(90deg, 
-        var(--bar-color) 0%, 
-        color-mix(in srgb, var(--bar-color) 80%, white) 100%
-    );
-    border-radius: 8px;
-    box-shadow: 
-        0 0 20px var(--bar-color),
-        inset 0 2px 0 rgba(255, 255, 255, 0.2);
-    transition: none;
-}
-
-/* Animated state - shrinks from 100% to target width */
-.decay-bar-fill.animate {
-    width: var(--bar-width, 100%);
-    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.decay-bar-info {
-    display: flex;
-    justify-content: space-between;
-    margin-top: var(--space-xs);
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-}
-
-.bar-label {
-    color: var(--color-text);
-}
-
-.bar-decay {
-    color: var(--color-pink);
-}
-
-/* Review Tags */
-.review-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-xs);
-}
-
-.tag {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    padding: 6px 12px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 20px;
-    color: var(--color-cyan);
-    border: 1px solid rgba(78, 205, 196, 0.2);
-}
-
-/* Decay Legend */
-.decay-legend {
-    max-width: 600px;
-    margin: var(--space-lg) auto 0;
-}
-
-.legend-title {
-    font-size: 0.8rem;
-    margin-bottom: var(--space-xs);
-}
-
-.legend-items {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-sm);
-    justify-content: center;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
     color: var(--color-text-muted);
 }
-
-.legend-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 2px;
-}
-
-/* Add review hint (kept for reference) */
-.add-review-hint {
-    max-width: 500px;
-    margin: 0 auto;
-}
-
-.hint-text {
-    font-size: 0.9rem;
-    color: var(--color-text-muted);
-    text-align: center;
-}
-
 
 /* ============================================
    10. FOOTER
@@ -1317,16 +888,11 @@ img {
     .review-item .review-icon  { font-size: 2rem; }
     .review-item .review-title { font-size: 1.1rem; }
     .score-badge      { margin-left: auto; }
-    .decay-bar-track  { height: 32px; }
 
-    /* ── Grading section ── */
-    .grading-card     { padding: var(--space-md); }
+    /* ── Category buttons ── */
     .category-btn     { font-size: 0.9rem; padding: var(--space-xs) var(--space-sm); }
-    .formula-box code { font-size: 0.9rem; }
-    .tier-bar         { height: 20px; }
 
-    .reviews-grid { grid-template-columns: 1fr; }
-    .shape        { transform: scale(0.5); }
+    .shape        { transform: scale(0.5); filter: blur(40px); }
 }
 
 @media (max-width: 480px) {
@@ -1351,7 +917,6 @@ img {
     .meme-caption { font-size: 0.68rem; }
 
     .container    { padding: var(--space-sm); }
-    .filter-btn   { font-size: 0.75rem; padding: 6px 12px; }
 }
 
 
@@ -1776,5 +1341,19 @@ img {
 
     .blog-banner {
         max-height: 200px;
+    }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
     }
 }
