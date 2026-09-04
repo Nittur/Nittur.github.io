@@ -186,8 +186,7 @@ Posts are sorted by `date` (newest first).
 /
 ├── blogs.html           # Listing + reader (single page)
 ├── js/
-│   ├── blog-engine.js   # MD parser + fetch layer
-│   └── blogs-main.js    # UI rendering + routing
+│   └── blogs.js         # MD parser + fetch + UI + routing
 └── content/
     └── blogs/
         ├── index.md     # Lists post files

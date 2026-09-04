@@ -75,8 +75,7 @@ Example cases:
 ├── css/
 │   └── styles.css        # Styling + animations
 ├── js/
-│   ├── reviews-data.js   # Loader (fetch + parse only)
-│   └── reviews-main.js   # UI rendering + interactions
+│   └── reviews.js        # Loader + UI rendering
 └── content/
     └── reviews/          # One .md file per category
         ├── index.md      # Lists category files

@@ -11,10 +11,8 @@ A personal site blending optimistic futurism with Japanese zen aesthetics. Home,
 ├── css/
 │   └── styles.css
 ├── js/
-│   ├── reviews-data.js   # Review loader (fetch + parse)
-│   ├── reviews-main.js   # Review UI
-│   ├── blog-engine.js    # Markdown engine + fetch layer
-│   └── blogs-main.js     # Blog UI + routing
+│   ├── reviews.js        # Review loader + UI
+│   └── blogs.js          # Markdown engine + fetch + UI
 ├── images/
 │   └── cogito_ergo_sum.png
 ├── content/
