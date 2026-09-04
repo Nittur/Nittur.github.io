@@ -4,9 +4,9 @@
    AESTHETIC: Optimistic Futurism + Japanese Cultural Elements + Retro + Holi Colors
    
    JAPANESE ELEMENTS USED:
-   - ⛩ Torii gate (logo)
-   - ✿ Cherry blossom (sakura)
-   - Seigaiha wave pattern (background)
+    - ⛩ Torii gate (logo)
+    - 🍂 Autumn fallen leaf
+    - Seigaiha wave pattern (background)
    - Corner frame decorations
    - Zen-inspired spacing and minimalism
    
@@ -337,17 +337,17 @@ img {
     margin-bottom: var(--space-sm);
 }
 
-/* Cherry blossom decorative element */
-.cherry-blossom {
+/* Autumn fallen leaf decorative element */
+.leaf {
     font-size: 2rem;
-    color: var(--color-pink);
+    color: var(--color-orange);
     display: inline-block;
     margin-bottom: var(--space-xs);
-    animation: floatBlossom 3s ease-in-out infinite;
-    text-shadow: 0 0 15px rgba(255, 107, 157, 0.5);
+    animation: leafDrift 6s ease-in-out infinite;
+    text-shadow: 0 0 15px rgba(255, 142, 83, 0.6);
 }
 
-.header-blossom {
+.header-leaf {
     display: block;
     text-align: center;
     margin-bottom: var(--space-sm);
@@ -412,7 +412,7 @@ img {
     box-shadow: inset 0 0 80px rgba(255, 107, 157, 0.04);
 }
 
-.tile-hero .cherry-blossom {
+.tile-hero .leaf {
     font-size: 1.5rem;
     margin-bottom: 0.4rem;
 }
@@ -827,13 +827,22 @@ img {
     }
 }
 
-/* Cherry blossom gentle float animation */
-@keyframes floatBlossom {
-    0%, 100% {
-        transform: translateY(0) rotate(0deg);
+/* Autumn leaf gentle falling + sway animation */
+@keyframes leafDrift {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    25% {
+        transform: translate(6px, 4px) rotate(18deg);
     }
     50% {
-        transform: translateY(-5px) rotate(5deg);
+        transform: translate(-4px, 10px) rotate(38deg);
+    }
+    75% {
+        transform: translate(4px, 14px) rotate(14deg);
+    }
+    100% {
+        transform: translate(0, 0) rotate(0deg);
     }
 }
 
@@ -875,7 +884,7 @@ img {
 
     .tile-hero .hero-title        { font-size: 1.35rem; }
     .tile-hero .about-text-compact { font-size: 0.82rem; line-height: 1.5; }
-    .tile-hero .cherry-blossom    { font-size: 1.2rem; margin-bottom: 0.25rem; }
+    .tile-hero .leaf              { font-size: 1.2rem; margin-bottom: 0.25rem; }
     .tile-hero .hero-subtitle     { margin-bottom: 0.4rem; font-size: 0.82rem; }
     .tile-icon                    { font-size: 1.25rem; }
     .tile-label                   { font-size: 0.88rem; }
@@ -908,7 +917,7 @@ img {
 
     .tile-hero .hero-title         { font-size: 1.15rem; }
     .tile-hero .about-text-compact { font-size: 0.75rem; }
-    .tile-hero .cherry-blossom     { font-size: 1rem; }
+    .tile-hero .leaf               { font-size: 1rem; }
     .tile-hero .hero-subtitle      { font-size: 0.75rem; }
     .tile-icon  { font-size: 1.05rem; }
     .tile-label { font-size: 0.8rem; }
