@@ -309,21 +309,9 @@ img {
     margin-bottom: var(--space-sm);
 }
 
-/* Gradient text - Holi colors */
+/* Matte text accent */
 .gradient-text {
-    background: linear-gradient(
-        135deg,
-        var(--color-pink),
-        var(--color-orange),
-        var(--color-yellow),
-        var(--color-cyan),
-        var(--color-blue)
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    background-size: 200% 200%;
-    animation: gradientShift 5s ease infinite;
+    color: #D9A0AE;
 }
 
 .retro-text {
@@ -456,6 +444,15 @@ img {
     font-style: italic;
     text-align: center;
     flex-shrink: 0;
+}
+
+.cogito-text {
+    font-family: var(--font-heading);
+    font-size: clamp(1.6rem, 3vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--color-text);
+    text-align: center;
 }
 
 /* ── About ── */
@@ -804,18 +801,6 @@ img {
     }
 }
 
-@keyframes gradientShift {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
-}
-
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -833,13 +818,13 @@ img {
         transform: translate(0, 0) rotate(0deg);
     }
     25% {
-        transform: translate(6px, 4px) rotate(18deg);
+        transform: translate(2px, 1px) rotate(6deg);
     }
     50% {
-        transform: translate(-4px, 10px) rotate(38deg);
+        transform: translate(-2px, 3px) rotate(12deg);
     }
     75% {
-        transform: translate(4px, 14px) rotate(14deg);
+        transform: translate(2px, 4px) rotate(5deg);
     }
     100% {
         transform: translate(0, 0) rotate(0deg);

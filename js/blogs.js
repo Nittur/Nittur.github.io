@@ -351,7 +351,7 @@ function showReader(filename) {
 function renderListing(posts) {
     const el = document.getElementById('blog-listing');
     if (!posts.length) {
-        el.innerHTML = '<p class="retro-text blog-empty">// no posts yet</p>';
+        el.innerHTML = '<p class="retro-text blog-empty">no posts yet</p>';
         return;
     }
 
@@ -390,7 +390,7 @@ function renderListing(posts) {
 
 async function loadPost(filename) {
     const content = document.getElementById('blog-content');
-    content.innerHTML = '<span class="retro-text blog-loading-text">// loading...</span>';
+    content.innerHTML = '<span class="retro-text blog-loading-text">loading...</span>';
 
     try {
         const post = await fetchBlogPost(filename);
@@ -398,7 +398,7 @@ async function loadPost(filename) {
     } catch (err) {
         content.innerHTML = `
             <p style="color:var(--color-text-muted);font-family:var(--font-mono);font-size:.9rem;line-height:1.8">
-                // could not load post.<br>
+                could not load post.<br>
                 If you're previewing locally, run a server first:<br>
                 <code style="color:var(--color-yellow)">npx serve .</code>
                 &nbsp;then open <code style="color:var(--color-cyan)">http://localhost:3000</code>
@@ -461,7 +461,7 @@ async function init() {
         listing.innerHTML = `
             <div class="zen-card small" style="text-align:center;padding:var(--space-xl)">
                 <p style="font-family:var(--font-mono);color:var(--color-text-muted);line-height:2">
-                    // local file preview — fetch is blocked by the browser<br>
+                    local file preview — fetch is blocked by the browser<br>
                     Start a local server to see your posts:<br>
                     <code style="color:var(--color-yellow)">npx serve .</code>
                     &nbsp;then open&nbsp;
@@ -477,7 +477,7 @@ async function init() {
     } catch (err) {
         console.error('Failed to load blog index:', err);
         listing.innerHTML =
-            '<p class="retro-text blog-empty">// could not load posts — check console</p>';
+            '<p class="retro-text blog-empty">could not load posts — check console</p>';
     }
 
     // Deep-link: ?post=filename.md

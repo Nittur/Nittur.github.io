@@ -125,7 +125,7 @@ function renderReviews(category) {
     const filtered = allReviews.filter(r => r.category === category);
 
     if (filtered.length === 0) {
-        container.innerHTML = '<p class="no-reviews retro-text">// no reviews yet in this category</p>';
+        container.innerHTML = '<p class="no-reviews retro-text">no reviews yet in this category</p>';
         return;
     }
 
