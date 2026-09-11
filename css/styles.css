@@ -5,7 +5,7 @@
    
    JAPANESE ELEMENTS USED:
     - ⛩ Torii gate (logo)
-    - 🍂 Autumn fallen leaf
+    - Black hole horizon (pure-CSS: event horizon + photon ring + accretion disk)
     - Seigaiha wave pattern (background)
    - Corner frame decorations
    - Zen-inspired spacing and minimalism
@@ -89,6 +89,8 @@ body {
     background-color: var(--color-bg);
     min-height: 100dvh;
     overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
     display: flex;
     flex-direction: column;
 
@@ -325,19 +327,72 @@ img {
     margin-bottom: var(--space-sm);
 }
 
-/* Autumn fallen leaf decorative element */
+/* Black hole horizon decorative element (pure CSS, no image asset)
+   Layers from the inside out:
+     1. event horizon → solid black core
+     2. photon ring   → bright lensed rim hugging the horizon
+     3. accretion disk → warm amber + deep violet glow bleeding outward
+   Sized via --bh-size so every responsive tier only changes one value. */
 .leaf {
-    font-size: 2rem;
-    color: var(--color-orange);
+    --bh-size: 2rem;
     display: inline-block;
+    position: relative;
+    width: var(--bh-size);
+    height: var(--bh-size);
     margin-bottom: var(--space-xs);
-    animation: leafDrift 6s ease-in-out infinite;
-    text-shadow: 0 0 15px rgba(255, 142, 83, 0.6);
+    border-radius: 50%;
+    /* Solid core fading out — reads as light failing to escape */
+    background: radial-gradient(
+        circle at 50% 50%,
+        #000 0 56%,
+        rgba(2, 2, 6, 0.92) 64%,
+        rgba(6, 4, 14, 0.45) 71%,
+        transparent 74%
+    );
+    /* Photon ring + accretion-disk bloom */
+    box-shadow:
+        0 0 0 1.5px rgba(255, 214, 170, 0.9),
+        0 0 12px 3px rgba(255, 150, 60, 0.5),
+        0 0 26px 10px rgba(120, 60, 255, 0.32);
+    animation: blackholeSpin 14s linear infinite;
+}
+
+/* Accretion disk streak that rotates behind the horizon */
+.leaf::before {
+    content: '';
+    position: absolute;
+    inset: -18%;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        rgba(255, 170, 90, 0.35) 55deg,
+        rgba(255, 226, 190, 0.55) 90deg,
+        rgba(150, 90, 255, 0.35) 150deg,
+        transparent 220deg,
+        rgba(120, 60, 255, 0.28) 300deg,
+        transparent 360deg
+    );
+    filter: blur(3px);
+    z-index: -1;
+    animation: blackholeDisk 9s linear infinite;
+}
+
+/* Bright photon ring drawn crisply on top of the core */
+.leaf::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 236, 210, 0.75);
+    box-shadow: inset 0 0 6px 1px rgba(255, 190, 120, 0.5);
+    pointer-events: none;
 }
 
 .header-leaf {
     display: block;
-    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
     margin-bottom: var(--space-sm);
 }
 
@@ -360,6 +415,15 @@ img {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    overscroll-behavior: none;
+}
+
+/* Prefer small-viewport units where supported — avoids the mobile
+   browser chrome (URL bar) causing the grid to overflow and clip. */
+@supports (height: 100svh) {
+    .home-page {
+        height: 100svh;
+    }
 }
 
 /* Bento grid — flex:1 fills the remaining height after the nav */
@@ -368,13 +432,30 @@ img {
     min-height: 0;
     display: grid;
     grid-template-columns: 1.4fr 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr 0.52fr;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.68fr);
     gap: 10px;
     padding: 6px 20px 20px;
     max-width: var(--max-width);
     width: 100%;
     margin: 0 auto;
     box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* About / hero tiles centre their stacks — keep them shrinkable everywhere
+   so a short row compresses the text rather than clipping it. */
+.tile-about,
+.tile-hero {
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* When vertical space is scarce, anchor content to the top edge so any
+   unavoidable trimming happens away from the first line of text. */
+@media (max-height: 700px) {
+    .tile-hero    { justify-content: flex-start; }
+    .tile-about   { justify-content: center; }
+    .tile-gif     { padding-top: 0.4rem; }
 }
 
 /* ── Base tile ── */
@@ -401,7 +482,7 @@ img {
 }
 
 .tile-hero .leaf {
-    font-size: 1.5rem;
+    --bh-size: 1.5rem;
     margin-bottom: 0.4rem;
 }
 
@@ -424,26 +505,6 @@ img {
     justify-content: center;
     background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
     border-color: rgba(108, 99, 255, 0.12);
-}
-
-.welcome-gif {
-    max-width: 82%;
-    max-height: 78%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    border-radius: 10px;
-    display: block;
-}
-
-.meme-caption {
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    color: var(--color-text-muted);
-    margin-top: 0.5rem;
-    font-style: italic;
-    text-align: center;
-    flex-shrink: 0;
 }
 
 .cogito-text {
@@ -577,9 +638,140 @@ img {
     margin-bottom: 0;
 }
 
-.footer-symbol {
-    color: var(--color-pink);
+/* ============================================
+   SHORT-VIEWPORT COMPRESSION (desktop / tablet)
+   The home page must never scroll, so when the window is short the
+   desktop bento grid tightens rather than clipping tile content.
+   Placed after all base tile rules so it always wins the cascade.
+   ============================================ */
+
+@media (min-width: 769px) and (max-height: 900px) {
+    .bento-grid {
+        grid-template-rows: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 0.78fr);
+        gap: 9px;
+        padding: 5px 18px 16px;
+    }
+
+    .bento-tile { padding: 1.25rem; }
+
+    .tile-hero .hero-title { font-size: clamp(1.4rem, 2.4vw, 2.3rem); }
+    .tile-hero .about-text-compact { font-size: 0.85rem; line-height: 1.5; }
+
+    .tile-icon  { font-size: 1.3rem; margin-bottom: 3px; }
+    .tile-label { font-size: 0.9rem; }
+    .tile-body  { font-size: 0.78rem; line-height: 1.4; }
+
+    .cogito-text { font-size: clamp(1.2rem, 2.4vw, 1.9rem); letter-spacing: 0.12em; }
 }
+
+@media (min-width: 769px) and (max-height: 700px) {
+    .bento-grid {
+        grid-template-rows: minmax(0, 1.05fr) minmax(0, 1fr) minmax(0, 0.62fr);
+        gap: 8px;
+        padding: 5px 16px 14px;
+    }
+    .bento-tile {
+        padding: 1rem;
+        border-radius: 14px;
+    }
+
+    .tile-hero .hero-title   { font-size: clamp(1.2rem, 2.2vw, 2rem); }
+    .tile-hero .leaf         { --bh-size: 1.15rem; margin-bottom: 0.2rem; }
+    .tile-hero .hero-subtitle { font-size: 0.78rem; margin-bottom: 0.3rem; }
+    .tile-hero .about-text-compact { font-size: 0.78rem; line-height: 1.4; }
+
+    .tile-icon  { font-size: 1.15rem; margin-bottom: 2px; }
+    .tile-label { font-size: 0.84rem; }
+    .tile-body  { font-size: 0.74rem; line-height: 1.35; }
+    .tile-arrow { font-size: 0.9rem; line-height: 1; }
+
+    .tile-blog,
+    .tile-reviews { gap: 0; }
+
+    .cogito-text { font-size: clamp(1rem, 2.2vw, 1.7rem); letter-spacing: 0.1em; }
+    .tile-footer { font-size: 0.7rem; }
+
+    /* Pin the arrow to the tile corner so a short row cannot push it out */
+    .tile-arrow {
+        position: absolute;
+        right: 0.9rem;
+        bottom: 0.7rem;
+        font-size: 0.9rem;
+        line-height: 1;
+    }
+
+    .tile-blog,
+    .tile-reviews { padding: 1rem; }
+}
+
+/* Very short desktop/tablet viewports — drop the least vital copy */
+@media (min-width: 769px) and (max-height: 560px) {
+    .bento-tile { padding: 0.7rem; }
+
+    .tile-hero .about-text-compact,
+    .tile-about .tile-body { display: none; }
+
+    .tile-hero .hero-title  { font-size: clamp(1rem, 2vw, 1.5rem); }
+    .tile-hero .hero-subtitle { font-size: 0.72rem; }
+    .tile-hero .leaf        { --bh-size: 1rem; }
+
+    .tile-icon  { font-size: 1rem; margin-bottom: 0; }
+    .tile-label { font-size: 0.78rem; }
+    .tile-body  { font-size: 0.68rem; }
+    .tile-arrow { font-size: 0.82rem; }
+
+    .cogito-text { font-size: clamp(0.85rem, 2vw, 1.3rem); letter-spacing: 0.06em; }
+    .main-nav    { padding: 0.4rem 1rem; }
+}
+
+/* Wide-but-short viewports (landscape phones / very short windows): the
+   desktop 4-column grid has no vertical room, so fall back to the compact
+   2-column layout used on phones. */
+@media (min-width: 769px) and (max-height: 500px) {
+    .bento-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: minmax(0, 1.05fr) minmax(0, 1fr) minmax(0, 0.55fr);
+        gap: 5px;
+        padding: 3px 10px 6px;
+    }
+
+    .bento-tile { padding: 0.5rem; border-radius: 12px; }
+
+    .tile-hero    { grid-column: 1 / 3; grid-row: 1; }
+    .tile-gif     { grid-column: 1 / 2; grid-row: 2; }
+    .tile-about   { grid-column: 2 / 3; grid-row: 2; }
+    .tile-blog    { grid-column: 1 / 2; grid-row: 3; }
+    .tile-reviews { grid-column: 2 / 3; grid-row: 3; }
+    .tile-footer  { display: none; }
+
+    .tile-hero .about-text-compact { display: none; }
+    .tile-hero .hero-title    { font-size: 1.05rem; margin-bottom: 0.15rem; }
+    .tile-hero .hero-subtitle { font-size: 0.7rem; margin-bottom: 0; }
+    .tile-hero .leaf          { --bh-size: 0.85rem; margin-bottom: 0; }
+
+    .tile-icon  { font-size: 1rem; margin-bottom: 1px; }
+    .tile-label { font-size: 0.78rem; }
+    .tile-body  { font-size: 0.66rem; line-height: 1.3; }
+
+    .tile-arrow {
+        position: absolute;
+        right: 0.55rem;
+        bottom: 0.4rem;
+        font-size: 0.8rem;
+        line-height: 1;
+    }
+
+    /* The arrow is absolutely positioned, so it needs no reserved space —
+       keeping padding equal on all sides stops tiny rows from overflowing. */
+    .tile-blog,
+    .tile-reviews { gap: 1px; justify-content: center; padding: 0.5rem; }
+
+    .cogito-text { font-size: 0.8rem; letter-spacing: 0.05em; }
+
+    .main-nav { padding: 0.3rem 0.6rem; }
+}
+
+
 
 
 /* ============================================
@@ -801,34 +993,33 @@ img {
     }
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
+/* Black hole accretion-disk animations.
+   The horizon itself never moves; only the disk and its glow rotate,
+   which is how a real accretion disk behaves. */
+@keyframes blackholeSpin {
+    0% {
+        box-shadow:
+            0 0 0 1.5px rgba(255, 214, 170, 0.9),
+            0 0 12px 3px rgba(255, 150, 60, 0.5),
+            0 0 26px 10px rgba(120, 60, 255, 0.32);
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    50% {
+        box-shadow:
+            0 0 0 1.5px rgba(255, 232, 200, 1),
+            0 0 16px 4px rgba(255, 170, 80, 0.62),
+            0 0 32px 13px rgba(140, 80, 255, 0.42);
+    }
+    100% {
+        box-shadow:
+            0 0 0 1.5px rgba(255, 214, 170, 0.9),
+            0 0 12px 3px rgba(255, 150, 60, 0.5),
+            0 0 26px 10px rgba(120, 60, 255, 0.32);
     }
 }
 
-/* Autumn leaf gentle falling + sway animation */
-@keyframes leafDrift {
-    0% {
-        transform: translate(0, 0) rotate(0deg);
-    }
-    25% {
-        transform: translate(2px, 1px) rotate(6deg);
-    }
-    50% {
-        transform: translate(-2px, 3px) rotate(12deg);
-    }
-    75% {
-        transform: translate(2px, 4px) rotate(5deg);
-    }
-    100% {
-        transform: translate(0, 0) rotate(0deg);
-    }
+@keyframes blackholeDisk {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
 }
 
 
@@ -843,21 +1034,57 @@ img {
         --space-xl: 3rem;
     }
 
-    /* ── Nav stays horizontal; just reduce padding ── */
+    /* ── Nav stays horizontal; concise on phones ── */
     .main-nav {
-        padding: 0.55rem var(--space-sm);
+        padding: 0.4rem 0.6rem;
+        padding-top: max(0.4rem, env(safe-area-inset-top));
+        flex-wrap: nowrap;
+    }
+
+    .nav-logo {
+        font-size: 1.05rem;
+        gap: 0.35rem;
+        min-width: 0;
+    }
+
+    .logo-symbol { font-size: 1.3rem; }
+
+    .logo-text {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .nav-links {
-        gap: var(--space-sm);
+        gap: 0.25rem;
+        flex-shrink: 0;
     }
 
-    /* ── Bento: 2-col × 3-row on mobile ── */
+    .nav-links a {
+        font-size: 0.78rem;
+        padding: 0.3rem 0.5rem;
+        white-space: nowrap;
+    }
+
+    /* ── Blog / Reviews link tiles: stack compactly and never clip ── */
+    .tile-blog,
+    .tile-reviews {
+        gap: 2px;
+        overflow: hidden;
+        min-height: 0;
+    }
+
+    .tile-arrow { line-height: 1; }
+
+    /* ── Bento: 2-col × 3-row on mobile ──
+       minmax(0, …) lets rows shrink so the grid never forces a scroll */
     .bento-grid {
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: 1.5fr 1.2fr 0.65fr;
-        gap: 8px;
-        padding: 6px 10px 10px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.62fr);
+        gap: 6px;
+        padding: 4px 8px 8px;
+        padding-bottom: max(8px, env(safe-area-inset-bottom));
+        overflow: hidden;
     }
 
     .tile-hero    { grid-column: 1 / 3; grid-row: 1; }
@@ -867,15 +1094,45 @@ img {
     .tile-reviews { grid-column: 2 / 3; grid-row: 3; }
     .tile-footer  { display: none; }
 
+    /* Tiles must be shrinkable, otherwise long content clips at the edges */
+    .bento-tile {
+        padding: 0.7rem;
+        border-radius: 14px;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .tile-hero,
+    .tile-gif {
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    /* COGITO ERGO SUM — kept concise so the long phrase fits a half-width tile */
+    .cogito-text {
+        font-size: clamp(0.8rem, 4.2vw, 1.5rem);
+        letter-spacing: 0.06em;
+        line-height: 1.2;
+        word-break: break-word;
+    }
+
     .tile-hero .hero-title        { font-size: 1.35rem; }
     .tile-hero .about-text-compact { font-size: 0.82rem; line-height: 1.5; }
-    .tile-hero .leaf              { font-size: 1.2rem; margin-bottom: 0.25rem; }
+    .tile-hero .leaf              { --bh-size: 1.2rem; margin-bottom: 0.25rem; }
     .tile-hero .hero-subtitle     { margin-bottom: 0.4rem; font-size: 0.82rem; }
     .tile-icon                    { font-size: 1.25rem; }
     .tile-label                   { font-size: 0.88rem; }
     .tile-body                    { font-size: 0.76rem; }
-    .welcome-gif                  { max-width: 90%; max-height: 72%; }
-    .meme-caption                 { font-size: 0.72rem; }
+
+    /* ── Reclaim vertical space in content containers ── */
+    .container {
+        padding: 1rem;
+        padding-top: 1.25rem;
+    }
+
+    .page-header {
+        padding: 0.5rem 0 1rem;
+    }
 
     /* ── Review items ── */
     .review-item-header { flex-wrap: wrap; gap: var(--space-sm); }
@@ -886,31 +1143,168 @@ img {
     /* ── Category buttons ── */
     .category-btn     { font-size: 0.9rem; padding: var(--space-xs) var(--space-sm); }
 
-    .shape        { transform: scale(0.5); filter: blur(40px); }
+    /* Lighter blur = less GPU work + cleaner look on small screens */
+    .shape        {
+        transform: scale(0.5);
+        filter: blur(20px);
+        opacity: 0.1;
+    }
+
+    .shape-3,
+    .shape-4 { display: none; }
 }
 
 @media (max-width: 480px) {
     .bento-grid {
-        gap: 6px;
-        padding: 4px 8px 8px;
+        gap: 5px;
+        padding: 3px 6px 6px;
+        padding-bottom: max(6px, env(safe-area-inset-bottom));
     }
 
     .bento-tile {
-        padding: var(--space-sm);
+        padding: 0.6rem;
         border-radius: 14px;
     }
 
-    .tile-hero .hero-title         { font-size: 1.15rem; }
-    .tile-hero .about-text-compact { font-size: 0.75rem; }
-    .tile-hero .leaf               { font-size: 1rem; }
-    .tile-hero .hero-subtitle      { font-size: 0.75rem; }
-    .tile-icon  { font-size: 1.05rem; }
-    .tile-label { font-size: 0.8rem; }
-    .tile-body  { font-size: 0.7rem; }
-    .tile-arrow { font-size: 0.95rem; }
-    .meme-caption { font-size: 0.68rem; }
+    /* Corner frames add noise on tiny tiles — keep the Zen minimalism */
+    .corner { display: none; }
 
-    .container    { padding: var(--space-sm); }
+    .tile-hero .hero-title         { font-size: 1.15rem; }
+    .tile-hero .about-text-compact { font-size: 0.75rem; line-height: 1.45; }
+    .tile-hero .leaf               { --bh-size: 1rem; }
+    .tile-hero .hero-subtitle      { font-size: 0.75rem; }
+    .tile-icon  { font-size: 1.05rem; margin-bottom: 2px; }
+    .tile-label { font-size: 0.8rem; }
+    .tile-body  { font-size: 0.7rem; line-height: 1.4; }
+    .tile-arrow { font-size: 0.95rem; }
+    .cogito-text { font-size: clamp(0.72rem, 4vw, 1.1rem); }
+
+    .nav-links a { font-size: 0.74rem; padding: 0.28rem 0.45rem; }
+    .nav-logo    { font-size: 0.98rem; }
+
+    .container    { padding: var(--space-sm); padding-top: 1rem; }
+}
+
+/* ── Landscape + short screens (360×640 phones, 844×390 landscape) ──
+   Nothing may overflow: text and padding compress instead of scrolling */
+@media (max-width: 768px) and (max-height: 700px) {
+    .bento-grid {
+        gap: 5px;
+        padding: 3px 8px 6px;
+    }
+
+    .bento-tile             { padding: 0.55rem; }
+    .tile-hero .hero-title  { font-size: clamp(0.95rem, 4vw, 1.2rem); }
+    .tile-hero .hero-subtitle,
+    .tile-hero .about-text-compact { font-size: 0.7rem; line-height: 1.4; }
+    .tile-hero .leaf        { --bh-size: 1rem; }
+    .tile-icon              { font-size: 1rem; }
+    .tile-label             { font-size: 0.8rem; }
+    .tile-body              { font-size: 0.68rem; line-height: 1.35; }
+    .cogito-text            { font-size: clamp(0.7rem, 3.8vw, 1.2rem); }
+}
+
+/* ── Very short viewports (landscape phones) — drop the least vital text ── */
+@media (max-width: 768px) and (max-height: 560px) {
+    .tile-about .tile-body,
+    .tile-hero .about-text-compact { display: none; }
+    .tile-hero .hero-title { font-size: 1rem; }
+    .tile-hero .leaf       { --bh-size: 0.9rem; }
+    .tile-label            { font-size: 0.72rem; }
+    .cogito-text           { font-size: 0.75rem; letter-spacing: 0.04em; }
+    .main-nav              { padding: 0.3rem 0.5rem; }
+}
+
+/* ── Narrow phones (≤380px: iPhone SE/mini) ── */
+@media (max-width: 380px) {
+    .nav-links a { padding: 0.25rem 0.35rem; font-size: 0.72rem; }
+    .logo-text   { font-size: 0.95rem; }
+    .logo-symbol { font-size: 1.15rem; }
+    .cogito-text { font-size: 0.72rem; letter-spacing: 0.03em; }
+    .bento-tile  { padding: 0.5rem; }
+    .tile-hero .hero-title { font-size: 1.05rem; }
+}
+
+/* ── Phones in landscape: tighten the nav and page padding ──
+   The grid layout for these widths is handled by the
+   "wide-but-short" block above; this only shrinks chrome. */
+@media (max-height: 500px) and (orientation: landscape) {
+    .main-nav { padding: 0.25rem 0.6rem; }
+
+    .nav-logo    { font-size: 0.95rem; }
+    .logo-symbol { font-size: 1.15rem; }
+    .nav-links   { gap: 0.2rem; }
+    .nav-links a { font-size: 0.72rem; padding: 0.2rem 0.4rem; }
+
+    .container { padding: 0.75rem; padding-top: 0.75rem; }
+
+    .page-header { padding: 0.25rem 0 0.5rem; }
+}
+
+/* ── Ultra-short viewports (any orientation) ──
+   Last-resort compression so nothing ever overflows or needs a scroll. */
+@media (max-height: 430px) {
+    .bento-tile { padding: 0.42rem; }
+
+    .tile-hero .hero-title  { font-size: 0.98rem; line-height: 1.15; margin-bottom: 0.1rem; }
+    .tile-hero .hero-subtitle { font-size: 0.68rem; margin-bottom: 0; }
+    .tile-hero .about-text-compact { display: none; }
+    .tile-hero .leaf        { --bh-size: 0.85rem; margin-bottom: 0; }
+
+    .tile-icon  { font-size: 0.95rem; margin-bottom: 0; }
+    .tile-label { font-size: 0.74rem; }
+    .tile-body  { font-size: 0.64rem; line-height: 1.25; }
+    .tile-arrow { font-size: 0.8rem; line-height: 1; margin-top: 1px; }
+
+    .tile-blog,
+    .tile-reviews { gap: 0; justify-content: center; }
+    .tile-about .tile-body { display: none; }
+
+    /* Anchor the arrow to the tile edge so it can never be clipped */
+    .tile-arrow {
+        position: absolute;
+        right: 0.5rem;
+        bottom: 0.35rem;
+        font-size: 0.72rem;
+        line-height: 1;
+    }
+    .tile-blog,
+    .tile-reviews { padding: 0.42rem; }
+
+    .tile-hero  { justify-content: center; }
+
+    .cogito-text { font-size: 0.75rem; letter-spacing: 0.04em; }
+    .main-nav    { padding: 0.2rem 0.5rem; }
+}
+
+/* ── Extremely short viewports (< 400px tall) ──
+   At this size only iconography survives; text would be unreadable anyway.
+   Keeps the promise that the home page never scrolls or clips. */
+@media (max-height: 400px) {
+    .tile-hero .hero-title    { font-size: 0.9rem; }
+    .tile-hero .hero-subtitle { display: none; }
+    .tile-hero .leaf          { --bh-size: 0.8rem; }
+
+    .tile-label { font-size: 0.7rem; }
+    .tile-body  { display: none; }
+
+    /* At this height only the icon and arrow fit in the link tiles */
+    .tile-blog,
+    .tile-reviews { gap: 0; padding: 0.3rem; }
+    .tile-blog .tile-label,
+    .tile-reviews .tile-label { display: none; }
+
+    .tile-blog .tile-arrow,
+    .tile-reviews .tile-arrow {
+        position: absolute;
+        right: 0.4rem;
+        bottom: 0.3rem;
+        font-size: 0.68rem;
+    }
+
+    .bento-tile { padding: 0.35rem; }
+    .tile-icon  { font-size: 0.9rem; }
+    .cogito-text { font-size: 0.7rem; }
 }
 
 
@@ -1349,5 +1743,14 @@ img {
         animation-iteration-count: 1 !important;
         transition-duration: 0.001ms !important;
         scroll-behavior: auto !important;
+    }
+
+    /* Animations are frozen at their 0% frame; make sure the black hole
+       still shows its full photon ring + disk glow when static. */
+    .leaf {
+        box-shadow:
+            0 0 0 1.5px rgba(255, 232, 200, 1),
+            0 0 16px 4px rgba(255, 170, 80, 0.62),
+            0 0 32px 13px rgba(140, 80, 255, 0.42);
     }
 }

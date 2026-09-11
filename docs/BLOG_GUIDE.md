@@ -184,14 +184,22 @@ Posts are sorted by `date` (newest first).
 
 ```
 /
-├── blogs.html           # Listing + reader (single page)
+├── index.html           # Bento home page
+├── blogs.html           # Blog listing + reader (single page)
+├── reviews.html         # Review categories
+├── css/
+│   └── styles.css       # Styling + animations for all pages
 ├── js/
-│   └── blogs.js         # MD parser + fetch + UI + routing
+│   ├── blogs.js         # MD parser + fetch + UI + routing
+│   └── reviews.js       # Review loader + UI
+├── images/              # Banner / hero images referenced by posts
 └── content/
-    └── blogs/
-        ├── index.md     # Lists post files
-        ├── on-decay.md
-        └── your-post.md
+    ├── blogs/
+    │   ├── index.md     # Lists post files
+    │   ├── on-decay.md
+    │   └── sartre.md
+    └── reviews/         # One .md per review category
+        └── index.md
 ```
 
 ---
