@@ -2,7 +2,6 @@
 title: 2 Cool for 2 Sum
 date: 2026-11-16
 genre: coding
-tags: programming
 font: sans
 layout: wide
 excerpt: How to learn from 1st leetcode problem

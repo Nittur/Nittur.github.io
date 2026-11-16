@@ -3,6 +3,7 @@ title: Existentialism is Humanism by Jean-Paul Sartre
 date: 2026-04-15
 genre: philosophy
 tags: philosophy
+draft: true
 font: sans
 accent: #6C63FF
 ---
