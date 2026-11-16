@@ -46,6 +46,18 @@ const htmlCache = new Map();
 
 let allMeta = [];
 
+// ── DOM ───────────────────────────────────────
+// The script is deferred, so the document is parsed before this runs.
+const viewListing = document.getElementById('view-listing');
+const viewReader  = document.getElementById('view-reader');
+const blogListing = document.getElementById('blog-listing');
+
+const BLOG_DATE_FORMAT = new Intl.DateTimeFormat('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+});
+
 // ── Index & frontmatter parsing ───────────────
 
 function parseIndexMd(text) {
@@ -322,40 +334,39 @@ async function fetchBlogPost(filename) {
 
 function formatBlogDate(dateStr) {
     if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('en-US',
-        { month: 'long', day: 'numeric', year: 'numeric' });
+    const date = new Date(dateStr);
+    return Number.isNaN(date.getTime()) ? dateStr : BLOG_DATE_FORMAT.format(date);
 }
 
 // ── Routing ───────────────────────────────────
 
 function showListing() {
-    document.getElementById('view-listing').style.display = '';
-    document.getElementById('view-reader').style.display  = 'none';
+    viewListing.style.display = '';
+    viewReader.style.display  = 'none';
     // Reset any post-level CSS variables
     document.documentElement.style.removeProperty('--blog-accent');
     document.body.style.fontFamily = '';
     history.replaceState(null, '', 'blogs.html');
-    window.scrollTo(0, 0);
+    blogListing.scrollTop = 0;
 }
 
 function showReader(filename) {
-    document.getElementById('view-listing').style.display = 'none';
-    document.getElementById('view-reader').style.display  = '';
+    viewListing.style.display = 'none';
+    viewReader.style.display  = '';
     history.replaceState(null, '', `blogs.html?post=${filename}`);
     loadPost(filename);
-    window.scrollTo(0, 0);
+    viewReader.scrollTop = 0;
 }
 
 // ── Listing renderer ──────────────────────────
 
 function renderListing(posts) {
-    const el = document.getElementById('blog-listing');
     if (!posts.length) {
-        el.innerHTML = '<p class="retro-text blog-empty">no posts yet</p>';
+        blogListing.innerHTML = '<p class="retro-text blog-empty">no posts yet</p>';
         return;
     }
 
-    el.innerHTML = posts.map((post, i) => `
+    blogListing.innerHTML = posts.map((post, i) => `
         <article class="blog-card" 
                  style="animation-delay: ${i * 0.08}s"
                  data-file="${post.filename}">
@@ -381,7 +392,7 @@ function renderListing(posts) {
     `).join('');
 
     // Click to open
-    el.querySelectorAll('.blog-card').forEach(card => {
+    blogListing.querySelectorAll('.blog-card').forEach(card => {
         card.addEventListener('click', () => showReader(card.dataset.file));
     });
 }
@@ -454,11 +465,9 @@ document.getElementById('back-btn-footer').addEventListener('click', showListing
 // ── Init ──────────────────────────────────────
 
 async function init() {
-    const listing = document.getElementById('blog-listing');
-
     // Detect local file:// — fetch can't work
     if (location.protocol === 'file:') {
-        listing.innerHTML = `
+        blogListing.innerHTML = `
             <div class="zen-card small" style="text-align:center;padding:var(--space-xl)">
                 <p style="font-family:var(--font-mono);color:var(--color-text-muted);line-height:2">
                     local file preview — fetch is blocked by the browser<br>
@@ -476,7 +485,7 @@ async function init() {
         renderListing(allMeta);
     } catch (err) {
         console.error('Failed to load blog index:', err);
-        listing.innerHTML =
+        blogListing.innerHTML =
             '<p class="retro-text blog-empty">could not load posts — check console</p>';
     }
 
@@ -485,4 +494,4 @@ async function init() {
     if (postFile) showReader(postFile);
 }
 
-document.addEventListener('DOMContentLoaded', init);
+init();

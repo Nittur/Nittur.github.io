@@ -19,7 +19,7 @@
    6. Typography
    7. Home Page (single viewport)
    8. Cards & Components
-   9. Reviews Page
+   9. Reviews Page (single viewport shell)
    10. Footer
    11. Animations
    12. Responsive Design
@@ -64,6 +64,30 @@
     --border-radius: 12px;
     --transition-speed: 0.3s;
     --max-width: 1200px;
+
+    /* === PIXEL UI SYSTEM ===
+       One dithered pixel texture + one dual-tone border treatment used by
+       every page (body, nav, footer, tiles, cards, buttons). */
+    --color-bg-deep: #080810;
+    --pixel-cell: 4px;                                  /* checkerboard pixel */
+    --pixel-grid: 20px;                                 /* grid line spacing */
+    --pixel-line: rgba(255, 255, 255, 0.035);           /* 1px grid lines */
+    --pixel-dither: rgba(255, 255, 255, 0.05);          /* checker squares */
+    --pixel-pattern:
+        linear-gradient(var(--pixel-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--pixel-line) 1px, transparent 1px),
+        repeating-conic-gradient(var(--pixel-dither) 0% 25%, transparent 0% 50%);
+    --pixel-pattern-size:
+        var(--pixel-grid) var(--pixel-grid),
+        var(--pixel-grid) var(--pixel-grid),
+        var(--pixel-cell) var(--pixel-cell);
+    --pixel-border-color: rgba(255, 255, 255, 0.14);
+    --pixel-border: 1px solid var(--pixel-border-color);
+    --pixel-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+    --pixel-corner: rgba(255, 255, 255, 0.16);
 }
 
 
@@ -86,7 +110,7 @@ body {
     font-size: 16px;
     line-height: 1.7;
     color: var(--color-text);
-    background-color: var(--color-bg);
+    background-color: var(--color-bg-deep);
     min-height: 100dvh;
     overflow-x: hidden;
     -webkit-text-size-adjust: 100%;
@@ -94,12 +118,13 @@ body {
     display: flex;
     flex-direction: column;
 
-    background: linear-gradient(
-        135deg,
-        var(--color-bg) 0%,
-        #1a1a2e 50%,
-        #0f0f23 100%
-    );
+    /* Dark pixel texture + soft accent bloom (no flat colour fills) */
+    background-image:
+        radial-gradient(1100px 720px at 85% -10%, rgba(108, 99, 255, 0.12), transparent 65%),
+        radial-gradient(900px 620px at -10% 110%, rgba(255, 107, 157, 0.08), transparent 65%),
+        var(--pixel-pattern);
+    background-size: auto, auto, var(--pixel-pattern-size);
+    background-attachment: fixed, fixed, fixed;
 }
 
 a {
@@ -115,6 +140,49 @@ img {
     max-width: 100%;
     height: auto;
     display: block;
+}
+
+
+/* ============================================
+   PIXEL PATTERN + FRAME PRIMITIVES
+   Every panel, card, button, nav and footer shares the same
+   dithered texture, dual-tone border and corner pixels.
+   ============================================ */
+
+.bento-tile,
+.review-item,
+.blog-card,
+.zen-card,
+.category-btn,
+.main-nav,
+.main-footer {
+    background-image: var(--pixel-pattern);
+    background-size: var(--pixel-pattern-size);
+}
+
+.bento-tile,
+.review-item,
+.blog-card,
+.zen-card {
+    position: relative;
+}
+
+.bento-tile::before,
+.review-item::before,
+.blog-card::before,
+.zen-card::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    pointer-events: none;
+    background-image:
+        linear-gradient(var(--pixel-corner), var(--pixel-corner)),
+        linear-gradient(var(--pixel-corner), var(--pixel-corner)),
+        linear-gradient(var(--pixel-corner), var(--pixel-corner)),
+        linear-gradient(var(--pixel-corner), var(--pixel-corner));
+    background-size: 4px 4px;
+    background-position: left top, right top, left bottom, right bottom;
+    background-repeat: no-repeat;
 }
 
 
@@ -209,20 +277,31 @@ img {
    ============================================ */
 
 .main-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--space-sm) var(--space-md);
-    max-width: var(--max-width);
+    display: block;
+    padding: 0;
+    max-width: none;
     width: 100%;
-    margin: 0 auto;
+    margin: 0;
     position: sticky;
     top: 0;
     z-index: 100;
     flex-shrink: 0;          /* never compress inside flex body */
-    background: rgba(13, 13, 13, 0.8);
+    background-color: rgba(9, 9, 16, 0.86);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
+    border-bottom: var(--pixel-border);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.65);
+}
+
+/* Full-width patterned bar with the content kept on the 1200px grid */
+.nav-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: var(--max-width);
+    width: 100%;
+    margin: 0 auto;
+    padding: var(--space-sm) var(--space-md);
 }
 
 .nav-logo {
@@ -263,6 +342,7 @@ img {
     position: relative;
 }
 
+/* Pixel dashes under the active nav link */
 .nav-links a::after {
     content: '';
     position: absolute;
@@ -270,7 +350,11 @@ img {
     left: 50%;
     width: 0;
     height: 2px;
-    background: linear-gradient(90deg, var(--color-pink), var(--color-blue));
+    background: repeating-linear-gradient(
+        90deg,
+        var(--color-pink) 0 4px,
+        var(--color-blue) 4px 8px
+    );
     transition: all var(--transition-speed);
     transform: translateX(-50%);
 }
@@ -410,7 +494,12 @@ img {
      [ blog ] [ reviews ]
    ============================================ */
 
-.home-page {
+/* Pages that must fit one viewport without scrolling:
+   .home-page (bento grid), .reviews-page (review shell) and
+   .blogs-page (blog listing + reader panes). */
+.home-page,
+.reviews-page,
+.blogs-page {
     height: 100dvh;
     overflow: hidden;
     display: flex;
@@ -419,9 +508,11 @@ img {
 }
 
 /* Prefer small-viewport units where supported — avoids the mobile
-   browser chrome (URL bar) causing the grid to overflow and clip. */
+   browser chrome (URL bar) causing the layout to overflow and clip. */
 @supports (height: 100svh) {
-    .home-page {
+    .home-page,
+    .reviews-page,
+    .blogs-page {
         height: 100svh;
     }
 }
@@ -460,9 +551,10 @@ img {
 
 /* ── Base tile ── */
 .bento-tile {
-    background: var(--color-bg-card);
+    background-color: var(--color-bg-card);
     border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: var(--pixel-border);
+    box-shadow: var(--pixel-shadow);
     padding: var(--space-md);
     overflow: hidden;
     position: relative;
@@ -476,9 +568,10 @@ img {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background: linear-gradient(145deg, #12122a 0%, #1c1c36 100%);
-    border-color: rgba(255, 107, 157, 0.12);
-    box-shadow: inset 0 0 80px rgba(255, 107, 157, 0.04);
+    background-color: #12122b;
+    border-color: rgba(255, 107, 157, 0.3);
+    box-shadow: var(--pixel-shadow), inset 0 0 80px rgba(255, 107, 157, 0.05);
+    --pixel-corner: rgba(255, 107, 157, 0.42);
 }
 
 .tile-hero .leaf {
@@ -503,8 +596,9 @@ img {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
-    border-color: rgba(108, 99, 255, 0.12);
+    background-color: #141a30;
+    border-color: rgba(108, 99, 255, 0.32);
+    --pixel-corner: rgba(108, 99, 255, 0.42);
 }
 
 .cogito-text {
@@ -540,27 +634,29 @@ img {
 .tile-blog {
     grid-column: 2 / 3;
     grid-row: 3;
-    background: linear-gradient(145deg, #0e1f3a 0%, #16213e 100%);
-    border-color: rgba(78, 205, 196, 0.14);
+    background-color: #101d33;
+    border-color: rgba(78, 205, 196, 0.32);
+    --pixel-corner: rgba(78, 205, 196, 0.42);
 }
 
 .tile-blog:hover {
     transform: translateY(-3px);
-    border-color: rgba(78, 205, 196, 0.4);
-    box-shadow: 0 12px 40px rgba(78, 205, 196, 0.12);
+    border-color: rgba(78, 205, 196, 0.6);
+    box-shadow: var(--pixel-shadow), 0 12px 40px rgba(78, 205, 196, 0.14);
 }
 
 .tile-reviews {
     grid-column: 3 / 4;
     grid-row: 3;
-    background: linear-gradient(145deg, #2a0d1e 0%, #231428 100%);
-    border-color: rgba(255, 107, 157, 0.14);
+    background-color: #241222;
+    border-color: rgba(255, 107, 157, 0.32);
+    --pixel-corner: rgba(255, 107, 157, 0.42);
 }
 
 .tile-reviews:hover {
     transform: translateY(-3px);
-    border-color: rgba(255, 107, 157, 0.4);
-    box-shadow: 0 12px 40px rgba(255, 107, 157, 0.12);
+    border-color: rgba(255, 107, 157, 0.6);
+    box-shadow: var(--pixel-shadow), 0 12px 40px rgba(255, 107, 157, 0.14);
 }
 
 /* ── Footer tile ── */
@@ -574,7 +670,7 @@ img {
     gap: 4px;
     color: var(--color-text-muted);
     font-size: 0.8rem;
-    background: rgba(255, 255, 255, 0.015);
+    background-color: #0e0e1a;
 }
 
 /* ── Tile internals ── */
@@ -614,20 +710,6 @@ img {
 .tile-reviews:hover .tile-arrow {
     transform: translateX(5px);
 }
-
-/* Corner decorations (Japanese frame style) on GIF tile */
-.corner {
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    border: 2px solid var(--color-pink);
-    opacity: 0.5;
-}
-
-.corner-tl { top: 10px;    left: 10px;  border-right: none; border-bottom: none; }
-.corner-tr { top: 10px;    right: 10px; border-left: none;  border-bottom: none; }
-.corner-bl { bottom: 10px; left: 10px;  border-right: none; border-top: none;    }
-.corner-br { bottom: 10px; right: 10px; border-left: none;  border-top: none;    }
 
 /* about-text-compact used inside tile-hero */
 .about-text-compact {
@@ -721,7 +803,7 @@ img {
     .tile-arrow { font-size: 0.82rem; }
 
     .cogito-text { font-size: clamp(0.85rem, 2vw, 1.3rem); letter-spacing: 0.06em; }
-    .main-nav    { padding: 0.4rem 1rem; }
+    .nav-inner    { padding: 0.4rem 1rem; }
 }
 
 /* Wide-but-short viewports (landscape phones / very short windows): the
@@ -768,7 +850,7 @@ img {
 
     .cogito-text { font-size: 0.8rem; letter-spacing: 0.05em; }
 
-    .main-nav { padding: 0.3rem 0.6rem; }
+    .nav-inner { padding: 0.3rem 0.6rem; }
 }
 
 
@@ -779,14 +861,12 @@ img {
    ============================================ */
 
 .zen-card {
-    background: var(--color-bg-card);
+    background-color: var(--color-bg-card);
     border-radius: var(--border-radius);
     padding: var(--space-md);
     position: relative;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 
-        0 4px 30px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    border: var(--pixel-border);
+    box-shadow: var(--pixel-shadow), 0 4px 30px rgba(0, 0, 0, 0.3);
 }
 
 .zen-card.small {
@@ -797,6 +877,28 @@ img {
 /* ============================================
    9. REVIEWS PAGE
    ============================================ */
+
+/* Fixed shell: nav, header, category bar and footer stay put; only the
+   review list scrolls, so the document itself never scrolls. */
+.reviews-page .container {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--space-md);
+    overflow: hidden;
+}
+
+.reviews-page .page-header,
+.blogs-page .page-header {
+    flex-shrink: 0;
+    padding: 0 0 var(--space-sm);
+}
+
+.reviews-page .main-footer,
+.blogs-page .main-footer {
+    padding: var(--space-sm) var(--space-md);
+}
 
 .page-header {
     text-align: center;
@@ -812,33 +914,38 @@ img {
     flex-wrap: wrap;
     justify-content: center;
     gap: var(--space-sm);
-    margin-bottom: var(--space-lg);
-    padding: var(--space-sm);
+    flex-shrink: 0;
+    margin-bottom: var(--space-sm);
+    padding: 0;
 }
 
 .category-btn {
     font-family: var(--font-mono);
     font-size: 1rem;
     padding: var(--space-sm) var(--space-md);
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    border: var(--pixel-border);
     border-radius: var(--border-radius);
-    background: var(--color-bg-card);
+    background-color: var(--color-bg-card);
+    box-shadow: var(--pixel-shadow);
     color: var(--color-text);
     cursor: pointer;
     transition: all var(--transition-speed);
 }
 
 .category-btn:hover {
-    border-color: var(--color-pink);
+    border-color: rgba(255, 107, 157, 0.65);
     transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(255, 107, 157, 0.2);
+    box-shadow: var(--pixel-shadow), 0 5px 20px rgba(255, 107, 157, 0.22);
 }
 
 .category-btn.active {
-    background: linear-gradient(135deg, var(--color-pink), var(--color-magenta));
-    border-color: transparent;
+    background-color: rgba(255, 107, 157, 0.18);
+    border-color: rgba(255, 107, 157, 0.75);
     color: white;
-    box-shadow: 0 5px 20px rgba(255, 107, 157, 0.3);
+    box-shadow:
+        var(--pixel-shadow),
+        0 0 18px rgba(255, 107, 157, 0.25),
+        inset 0 0 0 1px rgba(255, 107, 157, 0.2);
 }
 
 /* ============================================
@@ -846,45 +953,186 @@ img {
    ============================================ */
 
 .reviews-section {
+    display: none;
+    width: 100%;
     max-width: 800px;
     margin: 0 auto;
+    min-height: 0;
+}
+
+/* Becomes the flex column that hosts the title + scrollable list */
+.reviews-section.is-visible {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
 }
 
 .category-title {
     font-family: var(--font-heading);
     font-size: 1.8rem;
-    margin-bottom: var(--space-lg);
+    flex-shrink: 0;
+    margin-bottom: var(--space-sm);
     text-align: center;
 }
 
 .no-reviews {
     text-align: center;
-    padding: var(--space-xl);
+    padding: var(--space-md);
     color: var(--color-text-muted);
 }
 
-/* Reviews List Layout - vertical cards */
+/* Reviews List Layout - vertical cards.
+   The only scrollable region on this page: it absorbs the leftover
+   viewport height and scrolls internally when the cards overflow. */
 .reviews-list {
     display: flex;
     flex-direction: column;
-    gap: var(--space-md);
-    margin-bottom: var(--space-lg);
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
+    gap: var(--space-sm);
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable both-edges;
+    margin: 0;
+    padding-right: 2px;
+    --scroll-thumb: rgba(255, 107, 157, 0.45);
+    --scroll-thumb-hover: rgba(255, 107, 157, 0.6);
 }
+
+/* Shared scrollbar styling for every internally scrolling pane */
+.reviews-list,
+.blogs-page .blog-listing,
+.blogs-page #view-reader {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scroll-thumb, rgba(255, 107, 157, 0.45)) transparent;
+}
+
+.blogs-page .blog-listing,
+.blogs-page #view-reader {
+    --scroll-thumb: rgba(78, 205, 196, 0.45);
+    --scroll-thumb-hover: rgba(78, 205, 196, 0.6);
+}
+
+.reviews-list::-webkit-scrollbar,
+.blogs-page .blog-listing::-webkit-scrollbar,
+.blogs-page #view-reader::-webkit-scrollbar { width: 6px; }
+
+.reviews-list::-webkit-scrollbar-track,
+.blogs-page .blog-listing::-webkit-scrollbar-track,
+.blogs-page #view-reader::-webkit-scrollbar-track { background: transparent; }
+
+.reviews-list::-webkit-scrollbar-thumb,
+.blogs-page .blog-listing::-webkit-scrollbar-thumb,
+.blogs-page #view-reader::-webkit-scrollbar-thumb {
+    background: var(--scroll-thumb, rgba(255, 107, 157, 0.35));
+    border-radius: 3px;
+}
+
+.reviews-list::-webkit-scrollbar-thumb:hover,
+.blogs-page .blog-listing::-webkit-scrollbar-thumb:hover,
+.blogs-page #view-reader::-webkit-scrollbar-thumb:hover {
+    background: var(--scroll-thumb-hover, rgba(255, 107, 157, 0.6));
+}
+
+/* Short viewports: shrink the chrome so the list keeps the remaining
+   height instead of clipping it. */
+@media (max-height: 760px) {
+    .reviews-page .page-header .header-leaf,
+    .blogs-page .page-header .header-leaf {
+        --bh-size: 1.4rem;
+        margin-bottom: var(--space-xs);
+    }
+
+    .reviews-page .hero-title,
+    .blogs-page .hero-title {
+        font-size: clamp(1.4rem, 3vw, 2.1rem);
+        margin-bottom: 0.25rem;
+    }
+
+    .reviews-page .hero-subtitle,
+    .blogs-page .hero-subtitle {
+        margin-bottom: 0;
+        font-size: 0.85rem;
+    }
+
+    .category-bar {
+        gap: var(--space-xs);
+        margin-bottom: var(--space-xs);
+    }
+
+    .category-title { font-size: 1.35rem; }
+
+    /* Blog listing: tighten cards so more of the list is visible */
+    .blogs-page .blog-listing { gap: var(--space-sm); }
+    .blogs-page .blog-card-body { padding: var(--space-sm); gap: 2px; }
+    .blogs-page .blog-card-excerpt { font-size: 0.85rem; line-height: 1.5; }
+}
+
+@media (max-height: 560px) {
+    .reviews-page .hero-subtitle,
+    .reviews-page .page-header .header-leaf,
+    .reviews-page .main-footer,
+    .blogs-page .hero-subtitle,
+    .blogs-page .page-header .header-leaf,
+    .blogs-page .main-footer { display: none; }
+
+    .reviews-page .hero-title,
+    .blogs-page .hero-title {
+        font-size: 1.35rem;
+        margin-bottom: 0;
+    }
+
+    .category-btn {
+        padding: var(--space-xs) var(--space-sm);
+        font-size: 0.85rem;
+    }
+
+    .category-title { font-size: 1.1rem; }
+
+    /* Blog listing: drop excerpts, keep date/title/tags readable */
+    .blogs-page .blog-card-title { font-size: 1.1rem; }
+    .blogs-page .blog-card-excerpt { display: none; }
+    .blogs-page .blog-card-footer { margin-top: 0; }
+}
+
+@media (max-height: 430px) {
+    .reviews-page .container,
+    .blogs-page #view-listing,
+    .blogs-page #view-reader { padding-top: var(--space-xs); }
+
+    .reviews-page .page-header,
+    .blogs-page .page-header { display: none; }
+
+    .category-bar { padding-bottom: var(--space-xs); }
+    .review-item { padding: var(--space-sm); }
+    .blogs-page .blog-card-body { padding: var(--space-sm); }
+}
+
+/* Inline status messages (file:// hint / load errors) */
+.load-note {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+.load-note code { color: var(--color-yellow); }
 
 /* ============================================
    REVIEW ITEM
    ============================================ */
 
 .review-item {
-    background: var(--color-bg-card);
+    background-color: var(--color-bg-card);
     border-radius: var(--border-radius);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: var(--pixel-border);
+    box-shadow: var(--pixel-shadow);
     padding: var(--space-md);
     animation: slideIn 0.5s ease forwards;
     opacity: 0;
+    --pixel-corner: rgba(255, 107, 157, 0.4);
 }
 
 @keyframes slideIn {
@@ -899,8 +1147,8 @@ img {
 }
 
 .review-item:hover {
-    border-color: rgba(255, 107, 157, 0.3);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 107, 157, 0.55);
+    box-shadow: var(--pixel-shadow), 0 10px 40px rgba(0, 0, 0, 0.35);
 }
 
 .review-item-header {
@@ -958,7 +1206,8 @@ img {
 .main-footer {
     text-align: center;
     padding: var(--space-lg) var(--space-md);
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: rgba(9, 9, 16, 0.85);
+    border-top: var(--pixel-border);
     margin-top: auto;        /* pushes footer to bottom of flex body */
     flex-shrink: 0;
 }
@@ -1035,7 +1284,7 @@ img {
     }
 
     /* ── Nav stays horizontal; concise on phones ── */
-    .main-nav {
+    .nav-inner {
         padding: 0.4rem 0.6rem;
         padding-top: max(0.4rem, env(safe-area-inset-top));
         flex-wrap: nowrap;
@@ -1167,8 +1416,6 @@ img {
     }
 
     /* Corner frames add noise on tiny tiles — keep the Zen minimalism */
-    .corner { display: none; }
-
     .tile-hero .hero-title         { font-size: 1.15rem; }
     .tile-hero .about-text-compact { font-size: 0.75rem; line-height: 1.45; }
     .tile-hero .leaf               { --bh-size: 1rem; }
@@ -1212,7 +1459,7 @@ img {
     .tile-hero .leaf       { --bh-size: 0.9rem; }
     .tile-label            { font-size: 0.72rem; }
     .cogito-text           { font-size: 0.75rem; letter-spacing: 0.04em; }
-    .main-nav              { padding: 0.3rem 0.5rem; }
+    .nav-inner             { padding: 0.3rem 0.5rem; }
 }
 
 /* ── Narrow phones (≤380px: iPhone SE/mini) ── */
@@ -1229,7 +1476,7 @@ img {
    The grid layout for these widths is handled by the
    "wide-but-short" block above; this only shrinks chrome. */
 @media (max-height: 500px) and (orientation: landscape) {
-    .main-nav { padding: 0.25rem 0.6rem; }
+    .nav-inner { padding: 0.25rem 0.6rem; }
 
     .nav-logo    { font-size: 0.95rem; }
     .logo-symbol { font-size: 1.15rem; }
@@ -1274,7 +1521,7 @@ img {
     .tile-hero  { justify-content: center; }
 
     .cogito-text { font-size: 0.75rem; letter-spacing: 0.04em; }
-    .main-nav    { padding: 0.2rem 0.5rem; }
+    .nav-inner    { padding: 0.2rem 0.5rem; }
 }
 
 /* ── Extremely short viewports (< 400px tall) ──
@@ -1316,7 +1563,7 @@ img {
 
 .blog-loading {
     text-align: center;
-    padding: var(--space-xl);
+    padding: var(--space-md);
 }
 
 .blog-loading-text {
@@ -1326,7 +1573,7 @@ img {
 
 .blog-empty {
     text-align: center;
-    padding: var(--space-xl);
+    padding: var(--space-md);
     color: var(--color-text-muted);
 }
 
@@ -1334,21 +1581,52 @@ img {
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
+    flex: 1;
+    min-height: 0;
+    width: 100%;
     max-width: 720px;
     margin: 0 auto;
-    padding-bottom: var(--space-xl);
+    padding-bottom: var(--space-sm);
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable both-edges;
+}
+
+/* Fixed shell: the listing fills the viewport and only the card list
+   scrolls. The reader pane scrolls independently. */
+.blogs-page #view-listing {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--space-md);
+    overflow: hidden;
+}
+
+.blogs-page #view-reader {
+    flex: 1;
+    min-height: 0;
+    padding-top: var(--space-md);
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable both-edges;
 }
 
 /* ── Blog Card ────────────────────────────── */
 
 .blog-card {
     position: relative;
-    background: var(--color-bg-card);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background-color: var(--color-bg-card);
+    border: var(--pixel-border);
     border-radius: var(--border-radius);
+    box-shadow: var(--pixel-shadow);
     overflow: hidden;
     cursor: pointer;
     display: flex;
+    flex-shrink: 0;          /* never compress cards inside the scrolling list */
+    --pixel-corner: rgba(78, 205, 196, 0.4);
     transition: transform var(--transition-speed),
                 border-color var(--transition-speed),
                 box-shadow var(--transition-speed);
@@ -1357,8 +1635,9 @@ img {
 
 .blog-card:hover {
     transform: translateY(-3px);
-    border-color: rgba(255, 107, 157, 0.25);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    border-color: rgba(78, 205, 196, 0.5);
+    box-shadow: var(--pixel-shadow), 0 12px 40px rgba(0, 0, 0, 0.35),
+                0 0 24px rgba(78, 205, 196, 0.08);
 }
 
 /* Left accent bar (set to post's accent color) */
@@ -1399,7 +1678,6 @@ img {
     font-size: 1.35rem;
     font-weight: 700;
     line-height: 1.3;
-    color: var(--color-text);
     transition: color var(--transition-speed);
     /* default accent fallback */
     color: var(--blog-accent, var(--color-text));
@@ -1433,10 +1711,10 @@ img {
     font-family: var(--font-mono);
     font-size: 0.72rem;
     padding: 3px 10px;
-    background: rgba(255, 255, 255, 0.07);
+    background-color: rgba(78, 205, 196, 0.08);
     border-radius: 20px;
     color: var(--color-cyan);
-    border: 1px solid rgba(78, 205, 196, 0.2);
+    border: 1px solid rgba(78, 205, 196, 0.3);
 }
 
 .blog-read-link {
@@ -1458,6 +1736,8 @@ img {
     max-height: 340px;
     overflow: hidden;
     border-radius: var(--border-radius);
+    border: var(--pixel-border);
+    box-shadow: var(--pixel-shadow);
     margin-bottom: var(--space-lg);
 }
 
@@ -1488,8 +1768,9 @@ img {
 .blog-back-btn {
     font-family: var(--font-mono);
     font-size: 0.85rem;
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background-color: transparent;
+    border: var(--pixel-border);
+    box-shadow: var(--pixel-shadow);
     border-radius: var(--border-radius);
     color: var(--color-text-muted);
     padding: 6px 14px;
@@ -1620,8 +1901,10 @@ img {
 
 /* Code */
 .blog-content .code-block {
-    background: #0d0d1a;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: #0d0d1a;
+    background-image: var(--pixel-pattern);
+    background-size: var(--pixel-pattern-size);
+    border: var(--pixel-border);
     border-radius: var(--border-radius);
     padding: var(--space-md);
     overflow-x: auto;
@@ -1702,7 +1985,7 @@ img {
 .blog-post-footer {
     margin-top: var(--space-xl);
     padding-top: var(--space-md);
-    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    border-top: var(--pixel-border);
 }
 
 /* ── Blog responsive ──────────────────────── */

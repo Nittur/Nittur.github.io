@@ -20,10 +20,33 @@
  * Each body line is one review:  - <title> | <score> | <YYYY-MM-DD>
  */
 
-let allReviews = [];
+// ── DOM ───────────────────────────────────────
+// The script is deferred, so the document is parsed before this runs.
+const categoryBar    = document.getElementById('category-bar');
+const reviewsSection = document.getElementById('reviews-section');
+const categoryTitle  = document.getElementById('category-title');
+const reviewsList    = document.getElementById('reviews-container');
 
-// Derived from loaded reviews — no hardcoding needed
-let categoryMeta = {}; // { category: { label, icon } }
+// ── State ─────────────────────────────────────
+// { category: { icon, label, items } } — built once after loading
+let reviewsByCategory = new Map();
+
+const REVIEW_DATE_FORMAT = new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+});
+
+const HTML_ESCAPES = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+};
+
+const escapeHtml = value =>
+    String(value).replace(/[&<>"']/g, char => HTML_ESCAPES[char]);
 
 // ── Parse helpers ─────────────────────────────
 
@@ -107,92 +130,88 @@ async function fetchCategory(filename) {
 
 async function fetchAllReviews() {
     const files   = await fetchReviewIndex();
-    const results = await Promise.allSettled(files.map(f => fetchCategory(f)));
-    const items   = [];
-    results
-        .filter(r => r.status === 'fulfilled')
-        .forEach(r => items.push(...r.value));
-    return items;
+    const results = await Promise.allSettled(files.map(fetchCategory));
+    return results.flatMap(result => result.status === 'fulfilled' ? result.value : []);
 }
 
 // ── Render ────────────────────────────────────
 
-// Render reviews for a specific category
+// Group the flat review list once so category switches need no filtering
+function groupByCategory(reviews) {
+    const grouped = new Map();
+
+    reviews.forEach(review => {
+        const entry = grouped.get(review.category);
+        if (entry) {
+            entry.items.push(review);
+            return;
+        }
+        grouped.set(review.category, {
+            icon:  review.icon || '📌',
+            label: review.category.charAt(0).toUpperCase() + review.category.slice(1) + 's',
+            items: [review],
+        });
+    });
+
+    return grouped;
+}
+
+// Render reviews for a specific category in a single DOM write
 function renderReviews(category) {
-    const container = document.getElementById('reviews-container');
-    container.innerHTML = '';
+    const entry = reviewsByCategory.get(category);
+    const items = entry ? entry.items : [];
 
-    const filtered = allReviews.filter(r => r.category === category);
-
-    if (filtered.length === 0) {
-        container.innerHTML = '<p class="no-reviews retro-text">no reviews yet in this category</p>';
+    if (items.length === 0) {
+        reviewsList.innerHTML = '<p class="no-reviews retro-text">no reviews yet in this category</p>';
         return;
     }
 
-    filtered.forEach((review, index) => {
-        const card = document.createElement('div');
-        card.className = 'review-item';
-        card.style.animationDelay = `${index * 0.1}s`;
-
-        card.innerHTML = `
+    reviewsList.innerHTML = items.map((review, index) => `
+        <div class="review-item" style="animation-delay:${index * 0.1}s">
             <div class="review-item-header">
-                <span class="review-icon">${review.icon}</span>
+                <span class="review-icon">${escapeHtml(review.icon)}</span>
                 <div class="review-info">
-                    <h3 class="review-title">${review.title}</h3>
-                    ${review.date ? `<span class="review-date">${formatReviewDate(review.date)}</span>` : ''}
+                    <h3 class="review-title">${escapeHtml(review.title)}</h3>
+                    ${review.date ? `<span class="review-date">${escapeHtml(formatReviewDate(review.date))}</span>` : ''}
                 </div>
                 <div class="score-badge">
-                    <span class="score-value">${review.score}</span>
+                    <span class="score-value">${escapeHtml(review.score)}</span>
                     <span class="score-max">/10</span>
                 </div>
             </div>
-        `;
-
-        container.appendChild(card);
-    });
+        </div>
+    `).join('');
 }
 
 // Format review date
 function formatReviewDate(dateStr) {
     const date = new Date(dateStr);
-    if (isNaN(date)) return dateStr;
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return Number.isNaN(date.getTime()) ? dateStr : REVIEW_DATE_FORMAT.format(date);
 }
 
-// Build category buttons from whatever categories exist in the loaded reviews
+// Build category buttons from the categories found while loading
 function buildCategoryButtons() {
-    // Collect unique categories in the order they first appear
-    const seen = new Set();
-    allReviews.forEach(r => {
-        if (!seen.has(r.category)) {
-            seen.add(r.category);
-            // Pick the icon from the first review in that category
-            categoryMeta[r.category] = {
-                icon:  r.icon  || '📌',
-                label: r.category.charAt(0).toUpperCase() + r.category.slice(1) + 's',
-            };
-        }
-    });
-
-    const bar = document.getElementById('category-bar');
-    bar.innerHTML = [...seen].map(cat => {
-        const { icon, label } = categoryMeta[cat];
-        return `<button class="category-btn" data-category="${cat}">${icon} ${label}</button>`;
-    }).join('');
-
-    bar.querySelectorAll('.category-btn').forEach(btn => {
-        btn.addEventListener('click', () => showCategory(btn.dataset.category));
-    });
+    categoryBar.innerHTML = [...reviewsByCategory]
+        .map(([category, { icon, label }]) => `
+            <button type="button" class="category-btn" data-category="${escapeHtml(category)}" aria-pressed="false">
+                ${escapeHtml(icon)} ${escapeHtml(label)}
+            </button>
+        `)
+        .join('');
 }
 
 // Show reviews for a category
 function showCategory(category) {
-    document.getElementById('reviews-section').style.display = 'block';
-    const { icon, label } = categoryMeta[category] || { icon: '', label: category };
-    document.getElementById('category-title').textContent = `${icon} ${label}`;
+    const { icon = '', label = category } = reviewsByCategory.get(category) || {};
 
-    document.querySelectorAll('.category-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.category === category);
+    reviewsSection.classList.add('is-visible');
+    categoryTitle.textContent = `${icon} ${label}`;
+    reviewsList.scrollTop = 0;
+
+    categoryBar.querySelectorAll('.category-btn').forEach(button => {
+        const isActive = button.dataset.category === category;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
     });
 
     renderReviews(category);
@@ -200,21 +219,28 @@ function showCategory(category) {
 
 // ── Init ──────────────────────────────────────
 
+// One delegated listener instead of one per button
+categoryBar.addEventListener('click', event => {
+    const button = event.target.closest('.category-btn');
+    if (button) showCategory(button.dataset.category);
+});
+
 async function init() {
     // Detect local file:// — fetch won't work
     if (location.protocol === 'file:') {
-        document.getElementById('category-bar').innerHTML =
-            `<span class="retro-text" style="font-family:var(--font-mono);color:var(--color-text-muted);font-size:.85rem;">
-             Running locally? Use a server: <code style="color:var(--color-yellow)">npx serve .</code></span>`;
+        categoryBar.innerHTML =
+            `<span class="load-note">Running locally? Use a server: <code>npx serve .</code></span>`;
         return;
     }
 
     try {
-        allReviews = await fetchAllReviews();
+        reviewsByCategory = groupByCategory(await fetchAllReviews());
         buildCategoryButtons();
     } catch (err) {
         console.error('Failed to load reviews:', err);
+        categoryBar.innerHTML =
+            `<span class="load-note">could not load reviews — try again later</span>`;
     }
 }
 
-document.addEventListener('DOMContentLoaded', init);
+init();
