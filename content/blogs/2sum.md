@@ -10,7 +10,7 @@ excerpt: How to learn from 1st leetcode problem
 > Is this problem actually easy and should you solve it easily?
 
 ## Problem
-An array *nums* is given with *target* number where we have to find 2 indicies when added gives the target number.
+An array **nums** is given with **target** number where we have to find 2 indicies whose values when added gives the **target** number.
 
 ## Whats the fuss?
 Two things:
@@ -123,6 +123,6 @@ Here there are many things which require some reasoning over the solving logic
 - Creation of hash function to include negative interger values
 - insertion, search through the struct using the hash function
 
-This question does have complexity for a begineer and its good to understand how to optimize without direct api calls especially if you are beginning to code.
+This question has complexity for a begineer... and its good to understand how to optimize without direct api calls especially if you are learning to code.
 ---
-Code to understand and learn the way machine workds, not just solve.
+Code to understand and learn the way machine works, not just solve.
