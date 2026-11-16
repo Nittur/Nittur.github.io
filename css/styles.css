@@ -142,6 +142,17 @@ img {
     display: block;
 }
 
+/* The `hidden` attribute must win over component display rules (flex/grid) */
+[hidden] {
+    display: none !important;
+}
+
+/* Visible keyboard focus everywhere, in the pixel-dash style */
+:focus-visible {
+    outline: 2px dashed var(--focus-color, var(--color-cyan));
+    outline-offset: 2px;
+}
+
 
 /* ============================================
    PIXEL PATTERN + FRAME PRIMITIVES
@@ -668,9 +679,238 @@ img {
     align-items: center;
     justify-content: center;
     gap: 4px;
+    padding: 0 !important;   /* the scene fills the tile edge to edge */
+    background-color: transparent;   /* patterns only, no flat fill */
     color: var(--color-text-muted);
     font-size: 0.8rem;
-    background-color: #0e0e1a;
+    border-color: rgba(255, 142, 83, 0.32);
+    box-shadow: var(--pixel-shadow), inset 0 0 40px rgba(108, 59, 255, 0.18);
+    --pixel-corner: rgba(255, 179, 107, 0.55);
+}
+
+/* Corner pixels sit above the full-bleed scene */
+.tile-footer::before { z-index: 3; }
+
+/* ── Black hole scene — abstract, patterns only ──
+   Every element is a line / dot / stripe / checker pattern with
+   transparent gaps; nothing is a flat fill. Sized in container units
+   (cqmin = the tile's shorter side) so it scales and never overflows. */
+.tile-footer { container-type: size; }
+
+.bh-scene {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    /* gravity-well contour lines + the site pixel texture */
+    background:
+        repeating-radial-gradient(circle at 50% 50%,
+            rgba(108, 99, 255, 0.22) 0 1px, transparent 1px 9px),
+        var(--pixel-pattern);
+    background-size: auto, var(--pixel-pattern-size);
+    -webkit-mask: radial-gradient(ellipse 85% 95% at 50% 50%, #000 40%, rgba(0, 0, 0, 0.35) 100%);
+            mask: radial-gradient(ellipse 85% 95% at 50% 50%, #000 40%, rgba(0, 0, 0, 0.35) 100%);
+}
+
+.bh-scene > * {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+}
+
+/* Star dust — offset dot lattices */
+.bh-stars {
+    inset: 0;
+    left: 0;
+    top: 0;
+    background-image:
+        radial-gradient(circle, rgba(255, 255, 255, 0.7) 0 1px, transparent 1.5px),
+        radial-gradient(circle, rgba(78, 205, 196, 0.6) 0 1px, transparent 1.5px),
+        radial-gradient(circle, rgba(255, 107, 157, 0.55) 0 1px, transparent 1.5px);
+    background-size: 23px 19px, 37px 31px, 53px 43px;
+    background-position: 0 0, 11px 7px, 29px 17px;
+    animation: bhTwinkle 4s ease-in-out infinite alternate;
+}
+
+/* Spiral arms — hatched conic rays fading in toward the core */
+.bh-swirl {
+    width: 150cqmax;
+    height: 150cqmax;
+    margin: -75cqmax 0 0 -75cqmax;
+    background: repeating-conic-gradient(from 0deg,
+        rgba(255, 179, 107, 0.28) 0deg 1deg,
+        transparent 1deg 7deg,
+        rgba(192, 132, 252, 0.22) 7deg 8deg,
+        transparent 8deg 15deg);
+    -webkit-mask: radial-gradient(circle, transparent 7%, #000 13%, rgba(0, 0, 0, 0.4) 28%, transparent 45%);
+            mask: radial-gradient(circle, transparent 7%, #000 13%, rgba(0, 0, 0, 0.4) 28%, transparent 45%);
+    animation: bhSpin 30s linear infinite;
+}
+
+/* Accretion disk — striped ring with gaps, tilted flat by scaleY.
+   Back half behind the core, front half (bottom only) in front. */
+.bh-disk {
+    width: 90cqmin;
+    height: 90cqmin;
+    margin: -45cqmin 0 0 -45cqmin;
+    transform: rotate(-12deg) scaleY(0.26);
+}
+
+.bh-disk-front { clip-path: inset(50% 0 0 0); z-index: 2; }
+
+.bh-disk::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background:
+        repeating-conic-gradient(from 0deg,
+            rgba(255, 226, 190, 0.9) 0deg 2deg,
+            transparent 2deg 5deg,
+            rgba(255, 142, 83, 0.75) 5deg 7deg,
+            transparent 7deg 10deg),
+        repeating-radial-gradient(circle,
+            rgba(255, 179, 107, 0.55) 0 1px, transparent 1px 4px);
+    -webkit-mask: radial-gradient(circle, transparent 28%, #000 32%, #000 45%, rgba(0, 0, 0, 0.3) 57%, transparent 68%);
+            mask: radial-gradient(circle, transparent 28%, #000 32%, #000 45%, rgba(0, 0, 0, 0.3) 57%, transparent 68%);
+    animation: bhSpin 7s linear infinite;
+}
+
+/* Event horizon — dense contour rings sinking into darkness */
+.bh-core {
+    width: 26cqmin;
+    height: 26cqmin;
+    margin: -13cqmin 0 0 -13cqmin;
+    border-radius: 50%;
+    z-index: 1;
+    background:
+        repeating-radial-gradient(circle,
+            rgba(255, 210, 160, 0.30) 0 1px, transparent 1px 3px),
+        radial-gradient(circle, rgba(0, 0, 0, 0.95) 0 48%, rgba(0, 0, 0, 0.55) 64%, transparent 72%);
+    animation: bhPulse 5s ease-in-out infinite;
+}
+
+/* Photon ring — a dashed rim, turning */
+.bh-core::after {
+    content: '';
+    position: absolute;
+    inset: -6%;
+    border-radius: 50%;
+    background: repeating-conic-gradient(
+        rgba(255, 236, 210, 0.95) 0deg 6deg, transparent 6deg 12deg);
+    -webkit-mask: radial-gradient(circle, transparent 63%, #000 65%, #000 69%, transparent 71%);
+            mask: radial-gradient(circle, transparent 63%, #000 65%, #000 69%, transparent 71%);
+    animation: bhSpin 12s linear infinite reverse;
+}
+
+/* Lensed arc over the top — hatched, not filled */
+.bh-core::before {
+    content: '';
+    position: absolute;
+    inset: -24%;
+    border-radius: 50%;
+    background:
+        repeating-linear-gradient(90deg,
+            rgba(255, 210, 150, 0.85) 0 1px, transparent 1px 3px);
+    -webkit-mask:
+        conic-gradient(from 260deg, transparent 0deg, #000 50deg, #000 150deg, transparent 200deg),
+        radial-gradient(circle, transparent 55%, #000 58%, #000 66%, transparent 70%);
+    -webkit-mask-composite: source-in;
+            mask:
+        conic-gradient(from 260deg, transparent 0deg, #000 50deg, #000 150deg, transparent 200deg),
+        radial-gradient(circle, transparent 55%, #000 58%, #000 66%, transparent 70%);
+            mask-composite: intersect;
+}
+
+/* ── Planets: textured discs spiralling in ──
+   --a start angle, --r start radius, --s size, --c ink colour. */
+.bh-planet {
+    width: var(--s);
+    height: var(--s);
+    margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
+    border-radius: 50%;
+    z-index: 2;
+    box-shadow: 0 0 0 1px var(--c);
+    transform: rotate(var(--a)) translateX(var(--r));
+    animation: bhSpiral var(--t, 12s) cubic-bezier(0.55, 0, 0.85, 0.4) infinite;
+    animation-delay: var(--d, 0s);
+}
+
+/* Dotted trail behind the direction of travel */
+.bh-planet::before {
+    content: '';
+    position: absolute;
+    left: 35%;
+    width: 30%;
+    bottom: 60%;
+    height: 240%;
+    background: repeating-linear-gradient(to top,
+        var(--c) 0 2px, transparent 2px 6px);
+    -webkit-mask: linear-gradient(to top, #000, transparent);
+            mask: linear-gradient(to top, #000, transparent);
+    opacity: 0.7;
+    z-index: -1;
+}
+
+/* Striped giant */
+.bh-p1 {
+    --a: 200deg; --r: 70cqmin; --s: 15cqmin; --t: 13s; --d: 0s;
+    --c: rgba(255, 142, 83, 0.9);
+    background: repeating-linear-gradient(160deg,
+        var(--c) 0 2px, transparent 2px 5px);
+}
+
+/* Dotted ice world */
+.bh-p2 {
+    --a: 20deg; --r: 62cqmin; --s: 11cqmin; --t: 11s; --d: -4s;
+    --c: rgba(78, 205, 196, 0.9);
+    background: radial-gradient(circle, var(--c) 0 1px, transparent 1.5px) 0 0 / 4px 4px;
+}
+
+/* Checkered ringed planet */
+.bh-p3 {
+    --a: 300deg; --r: 78cqmin; --s: 12cqmin; --t: 15s; --d: -9s;
+    --c: rgba(192, 132, 252, 0.85);
+    background: repeating-conic-gradient(var(--c) 0% 25%, transparent 0% 50%) 0 0 / 5px 5px;
+}
+.bh-p3::after {
+    content: '';
+    position: absolute;
+    inset: 32% -45%;
+    border-radius: 50%;
+    border: 1px dashed rgba(255, 217, 61, 0.85);
+    transform: rotate(-20deg);
+}
+
+/* Cross-hatched rock */
+.bh-p4 {
+    --a: 120deg; --r: 54cqmin; --s: 7cqmin; --t: 9s; --d: -6.5s;
+    --c: rgba(200, 200, 225, 0.8);
+    background:
+        repeating-linear-gradient(45deg,  var(--c) 0 1px, transparent 1px 4px),
+        repeating-linear-gradient(-45deg, var(--c) 0 1px, transparent 1px 4px);
+}
+
+@keyframes bhSpiral {
+    0%   { transform: rotate(var(--a)) translateX(var(--r)) scale(1);
+           opacity: 0; }
+    10%  { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { transform: rotate(calc(var(--a) + 420deg)) translateX(0) scale(0.1);
+           opacity: 0; }
+}
+
+@keyframes bhSpin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes bhPulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.8; }
+}
+
+@keyframes bhTwinkle {
+    from { opacity: 0.5; }
+    to   { opacity: 0.95; }
 }
 
 /* ── Tile internals ── */
@@ -1271,6 +1511,18 @@ img {
     to   { transform: rotate(360deg); }
 }
 
+/* Loading text breathing (used by .blog-loading-text) */
+@keyframes pulse {
+    0%, 100% { opacity: 0.45; }
+    50%      { opacity: 1; }
+}
+
+/* Simple fade + rise for list rows and grid tiles */
+@keyframes riseIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
 
 /* ============================================
    12. RESPONSIVE DESIGN
@@ -1392,12 +1644,16 @@ img {
     /* ── Category buttons ── */
     .category-btn     { font-size: 0.9rem; padding: var(--space-xs) var(--space-sm); }
 
-    /* Lighter blur = less GPU work + cleaner look on small screens */
+    /* Lighter blur = less GPU work + cleaner look on small screens.
+       Sized via width/height — a transform would be overridden by the
+       `float` animation, which animates transform itself. */
     .shape        {
-        transform: scale(0.5);
-        filter: blur(20px);
-        opacity: 0.1;
+        filter: blur(40px);
+        opacity: 0.12;
     }
+
+    .shape-1 { width: 220px; height: 220px; }
+    .shape-2 { width: 170px; height: 170px; }
 
     .shape-3,
     .shape-4 { display: none; }
@@ -1584,9 +1840,10 @@ img {
     flex: 1;
     min-height: 0;
     width: 100%;
-    max-width: 720px;
+    max-width: 760px;
     margin: 0 auto;
-    padding-bottom: var(--space-sm);
+    /* Top room so hover-lift + focus outlines aren't clipped by the scroller */
+    padding: 6px 2px var(--space-sm);
     overflow-y: auto;
     overflow-x: hidden;
     overscroll-behavior: contain;
@@ -1614,7 +1871,150 @@ img {
     scrollbar-gutter: stable both-edges;
 }
 
-/* ── Blog Card ────────────────────────────── */
+/* ── Genre bar ────────────────────────────── */
+/* Reuses .category-btn from Reviews; each tab carries its own
+   --genre-accent (set inline from genres.md). */
+
+.genre-bar {
+    position: relative;      /* offset parent for the active-tab scroll math */
+    display: flex;
+    justify-content: center;
+    gap: var(--space-xs);
+    flex-shrink: 0;
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 4px 2px 8px;
+}
+
+.genre-btn {
+    --genre-accent: var(--color-cyan);
+    --focus-color: var(--genre-accent);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    flex-shrink: 0;
+    position: relative;
+    font-size: 0.85rem;
+    padding: 0.45rem 0.9rem;
+    white-space: nowrap;
+}
+
+.genre-btn-icon { font-size: 1em; line-height: 1; }
+
+.genre-count {
+    font-size: 0.7rem;
+    min-width: 1.5em;
+    padding: 0 0.4em;
+    line-height: 1.5;
+    text-align: center;
+    border-radius: 6px;
+    color: var(--color-text-muted);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background-image: var(--pixel-pattern);
+    background-size: var(--pixel-pattern-size);
+}
+
+.genre-btn:hover {
+    border-color: color-mix(in srgb, var(--genre-accent) 65%, transparent);
+    box-shadow: var(--pixel-shadow), 0 5px 20px color-mix(in srgb, var(--genre-accent) 22%, transparent);
+}
+
+/* Active tab: accent border + glow + dithered underline, no flat fill */
+.genre-btn.active {
+    color: var(--color-text);
+    background-color: color-mix(in srgb, var(--genre-accent) 14%, var(--color-bg-card));
+    border-color: color-mix(in srgb, var(--genre-accent) 75%, transparent);
+    box-shadow:
+        var(--pixel-shadow),
+        0 0 18px color-mix(in srgb, var(--genre-accent) 25%, transparent),
+        inset 0 0 0 1px color-mix(in srgb, var(--genre-accent) 20%, transparent);
+}
+
+.genre-btn.active::after {
+    content: '';
+    position: absolute;
+    left: 18%;
+    right: 18%;
+    bottom: -1px;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, var(--genre-accent) 0 4px, transparent 4px 7px);
+}
+
+.genre-btn.active .genre-count {
+    color: var(--genre-accent);
+    border-color: color-mix(in srgb, var(--genre-accent) 45%, transparent);
+}
+
+/* Short line under the tabs describing the current genre */
+.genre-info {
+    --genre-accent: var(--color-cyan);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-shrink: 0;
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto var(--space-sm);
+    padding: 0 4px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+}
+
+/* Dotted pixel rule between description and count */
+.genre-info::before {
+    content: '';
+    order: 1;
+    flex: 1;
+    min-width: 1rem;
+    height: 2px;
+    opacity: 0.55;
+    background: repeating-linear-gradient(90deg, var(--genre-accent) 0 2px, transparent 2px 6px);
+}
+
+.genre-info-desc  { order: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.genre-info-count { order: 2; color: var(--genre-accent); white-space: nowrap; }
+
+/* Small genre label used on cards (All tab) and in the reader meta */
+.genre-chip {
+    --genre-accent: var(--color-cyan);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    line-height: 1.6;
+    padding: 1px 9px;
+    border-radius: 6px;
+    white-space: nowrap;
+    color: var(--genre-accent);
+    border: 1px solid color-mix(in srgb, var(--genre-accent) 40%, transparent);
+    background-color: color-mix(in srgb, var(--genre-accent) 8%, transparent);
+    background-image: var(--pixel-pattern);
+    background-size: var(--pixel-pattern-size);
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+a.genre-chip:hover {
+    border-color: var(--genre-accent);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--genre-accent) 30%, transparent);
+}
+
+.draft-badge {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-left: 6px;
+    padding: 1px 8px;
+    border-radius: 6px;
+    color: var(--color-yellow);
+    border: 1px dashed rgba(255, 217, 61, 0.55);
+    background: repeating-linear-gradient(-45deg, rgba(255, 217, 61, 0.1) 0 4px, transparent 4px 8px);
+}
+
+/* ── Layout: cards (default) ──────────────── */
 
 .blog-card {
     position: relative;
@@ -1626,7 +2026,9 @@ img {
     cursor: pointer;
     display: flex;
     flex-shrink: 0;          /* never compress cards inside the scrolling list */
-    --pixel-corner: rgba(78, 205, 196, 0.4);
+    --post-accent: var(--color-cyan);
+    --focus-color: var(--post-accent);
+    --pixel-corner: color-mix(in srgb, var(--post-accent) 45%, transparent);
     transition: transform var(--transition-speed),
                 border-color var(--transition-speed),
                 box-shadow var(--transition-speed);
@@ -1635,21 +2037,27 @@ img {
 
 .blog-card:hover {
     transform: translateY(-3px);
-    border-color: rgba(78, 205, 196, 0.5);
+    border-color: color-mix(in srgb, var(--post-accent) 50%, transparent);
     box-shadow: var(--pixel-shadow), 0 12px 40px rgba(0, 0, 0, 0.35),
-                0 0 24px rgba(78, 205, 196, 0.08);
+                0 0 24px color-mix(in srgb, var(--post-accent) 10%, transparent);
 }
 
-/* Left accent bar (set to post's accent color) */
+/* Left accent bar: dithered pixel stripe in the post / genre accent */
 .blog-card-accent-bar {
     width: 4px;
     flex-shrink: 0;
-    border-radius: 0;
+    background: repeating-linear-gradient(
+        180deg,
+        var(--post-accent) 0 4px,
+        color-mix(in srgb, var(--post-accent) 25%, transparent) 4px 6px
+    );
+    opacity: 0.85;
 }
 
 .blog-card-body {
     padding: var(--space-md);
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: var(--space-xs);
@@ -1657,7 +2065,8 @@ img {
 
 .blog-card-meta {
     display: flex;
-    gap: var(--space-sm);
+    flex-wrap: wrap;
+    gap: 6px var(--space-sm);
     align-items: center;
 }
 
@@ -1673,19 +2082,15 @@ img {
     color: var(--color-cyan);
 }
 
+.blog-card-meta .genre-chip { margin-left: auto; }
+
 .blog-card-title {
     font-family: var(--font-heading);
     font-size: 1.35rem;
     font-weight: 700;
     line-height: 1.3;
+    color: var(--post-accent);
     transition: color var(--transition-speed);
-    /* default accent fallback */
-    color: var(--blog-accent, var(--color-text));
-}
-
-/* When no accent is set, title stays white */
-.blog-card:not([data-accent]) .blog-card-title {
-    color: var(--color-text);
 }
 
 .blog-card-excerpt {
@@ -1698,6 +2103,7 @@ img {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: var(--space-sm);
     margin-top: var(--space-xs);
 }
 
@@ -1712,6 +2118,8 @@ img {
     font-size: 0.72rem;
     padding: 3px 10px;
     background-color: rgba(78, 205, 196, 0.08);
+    background-image: var(--pixel-pattern);
+    background-size: var(--pixel-pattern-size);
     border-radius: 20px;
     color: var(--color-cyan);
     border: 1px solid rgba(78, 205, 196, 0.3);
@@ -1721,13 +2129,205 @@ img {
     font-family: var(--font-mono);
     font-size: 0.82rem;
     color: var(--color-pink);
+    white-space: nowrap;
     opacity: 0.7;
-    transition: opacity var(--transition-speed);
+    transition: opacity var(--transition-speed), transform var(--transition-speed);
 }
 
 .blog-card:hover .blog-read-link {
     opacity: 1;
+    transform: translateX(3px);
 }
+
+/* ── Layout: list (compact rows) ──────────── */
+
+.blog-listing[data-layout="list"] { gap: 6px; }
+
+.blog-row {
+    --post-accent: var(--color-yellow);
+    --focus-color: var(--post-accent);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-shrink: 0;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    border-left: 2px solid color-mix(in srgb, var(--post-accent) 45%, transparent);
+    background-color: rgba(22, 33, 62, 0.45);
+    background-image: var(--pixel-pattern);
+    background-size: var(--pixel-pattern-size);
+    transition: border-color var(--transition-speed), background-color var(--transition-speed),
+                box-shadow var(--transition-speed);
+    animation: riseIn 0.35s ease both;
+}
+
+.blog-row:hover {
+    background-color: rgba(22, 33, 62, 0.9);
+    border-color: color-mix(in srgb, var(--post-accent) 35%, transparent);
+    border-left-color: var(--post-accent);
+    box-shadow: 0 0 22px color-mix(in srgb, var(--post-accent) 10%, transparent);
+}
+
+.blog-row-date {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    min-width: 7.5em;
+}
+
+.blog-row-title {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 700;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color var(--transition-speed);
+}
+
+.blog-row:hover .blog-row-title { color: var(--post-accent); }
+
+/* Dotted pixel leader between title and read time */
+.blog-row-leader {
+    flex: 1;
+    min-width: 1.5rem;
+    height: 2px;
+    opacity: 0.35;
+    background: repeating-linear-gradient(90deg, var(--color-text-muted) 0 2px, transparent 2px 6px);
+}
+
+.blog-row-time {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--post-accent);
+    flex-shrink: 0;
+}
+
+/* ── Layout: grid (2-column tiles) ────────── */
+
+.blog-listing[data-layout="grid"] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* max-content: inside a flex:1 scroller, `auto` rows collapse to the
+       tiles' min-height and clip their content */
+    grid-auto-rows: max-content;
+    align-content: start;
+    gap: var(--space-sm);
+    max-width: 860px;
+}
+
+/* The bar + info line follow the wider grid */
+.blogs-page #view-listing:has(.blog-listing[data-layout="grid"]) .genre-bar,
+.blogs-page #view-listing:has(.blog-listing[data-layout="grid"]) .genre-info {
+    max-width: 860px;
+}
+
+.blog-listing[data-layout="grid"] .blog-empty { grid-column: 1 / -1; }
+
+.blog-tile {
+    --post-accent: var(--color-cyan);
+    --focus-color: var(--post-accent);
+    --pixel-corner: color-mix(in srgb, var(--post-accent) 60%, transparent);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 9.5rem;
+    padding: 1.1rem 1.2rem;
+    border-radius: 14px;
+    border: var(--pixel-border);
+    box-shadow: var(--pixel-shadow), inset 0 0 60px color-mix(in srgb, var(--post-accent) 5%, transparent);
+    background-color: var(--color-bg-card);
+    background-image:
+        radial-gradient(260px 160px at 100% 0%, color-mix(in srgb, var(--post-accent) 12%, transparent), transparent 70%),
+        var(--pixel-pattern);
+    background-size: auto, var(--pixel-pattern-size);
+    transition: transform var(--transition-speed), border-color var(--transition-speed),
+                box-shadow var(--transition-speed);
+    animation: riseIn 0.4s ease both;
+}
+
+/* Corner pixels, like every other panel */
+.blog-tile::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    pointer-events: none;
+    background-image:
+        linear-gradient(var(--pixel-corner), var(--pixel-corner)),
+        linear-gradient(var(--pixel-corner), var(--pixel-corner)),
+        linear-gradient(var(--pixel-corner), var(--pixel-corner)),
+        linear-gradient(var(--pixel-corner), var(--pixel-corner));
+    background-size: 4px 4px;
+    background-position: left top, right top, left bottom, right bottom;
+    background-repeat: no-repeat;
+}
+
+.blog-tile:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--post-accent) 55%, transparent);
+    box-shadow: var(--pixel-shadow), 0 12px 34px rgba(0, 0, 0, 0.35),
+                0 0 24px color-mix(in srgb, var(--post-accent) 14%, transparent);
+}
+
+/* Tiles size to their content; never let the clamped excerpt get squeezed */
+.blog-tile > * { flex-shrink: 0; }
+
+.blog-tile-icon {
+    font-size: 1.3rem;
+    line-height: 1;
+    color: var(--post-accent);
+    text-shadow: 0 0 12px color-mix(in srgb, var(--post-accent) 50%, transparent);
+}
+
+.blog-tile-title {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    line-height: 1.35;
+    font-weight: 700;
+}
+
+.blog-tile-excerpt {
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: var(--color-text-muted);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+}
+
+.blog-tile-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-xs);
+    margin-top: auto;
+    padding-top: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+}
+
+.blog-tile-meta span { color: var(--post-accent); }
+
+/* Status / not-found / file:// messages */
+.blog-message {
+    text-align: center;
+    padding: var(--space-lg) var(--space-sm);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    line-height: 2;
+    color: var(--color-text-muted);
+}
+
+.blog-message p + p,
+.blog-message p + .blog-back-btn { margin-top: var(--space-sm); }
+.blog-message .blog-back-btn { margin-bottom: 0; }
+.blog-message code { color: var(--color-yellow); }
 
 /* ── Banner ───────────────────────────────── */
 
@@ -1738,7 +2338,7 @@ img {
     border-radius: var(--border-radius);
     border: var(--pixel-border);
     box-shadow: var(--pixel-shadow);
-    margin-bottom: var(--space-lg);
+    margin-bottom: var(--space-md);
 }
 
 .blog-banner-img {
@@ -1766,9 +2366,13 @@ img {
 }
 
 .blog-back-btn {
+    display: inline-block;
     font-family: var(--font-mono);
     font-size: 0.85rem;
-    background-color: transparent;
+    line-height: 1.6;
+    background-color: rgba(22, 33, 62, 0.4);
+    background-image: var(--pixel-pattern);
+    background-size: var(--pixel-pattern-size);
     border: var(--pixel-border);
     box-shadow: var(--pixel-shadow);
     border-radius: var(--border-radius);
@@ -1879,18 +2483,48 @@ img {
     color: var(--color-text-muted);
 }
 
+/* Lists — the global `ul { list-style: none }` reset strips markers, so
+   bullets are drawn here as pixel squares in the post accent colour. */
 .blog-content .blog-list {
-    margin: var(--space-sm) 0 var(--space-md) var(--space-md);
+    margin: 0 0 var(--space-md);
+    padding-left: 1.6rem;
+    font-size: 1.05rem;
     color: var(--color-text);
 }
 
 .blog-content .blog-list li {
-    margin-bottom: 6px;
-    padding-left: 4px;
+    position: relative;
+    margin-bottom: 0.45rem;
+    padding-left: 0.2rem;
+}
+
+.blog-content .blog-list li:last-child { margin-bottom: 0; }
+
+.blog-content ul.blog-list > li::before {
+    content: '';
+    position: absolute;
+    left: -1.05rem;
+    top: 0.78em;
+    width: 6px;
+    height: 6px;
+    background: var(--blog-accent, var(--color-cyan));
+    box-shadow: 0 0 6px var(--blog-accent, var(--color-cyan));
+    opacity: 0.85;
 }
 
 .blog-content .blog-list-ol {
     list-style: decimal;
+}
+
+.blog-content .blog-list-ol > li::marker {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    color: var(--blog-accent, var(--color-cyan));
+}
+
+/* A lead-in line ("Two things:") sits close to the list it introduces */
+.blog-content .blog-p:has(+ .blog-list) {
+    margin-bottom: var(--space-xs);
 }
 
 .blog-content .blog-divider {
@@ -2002,10 +2636,13 @@ img {
     .blog-content .blog-h1 { font-size: 1.5rem; }
     .blog-content .blog-h2 { font-size: 1.2rem; }
 
-    .blog-post-meta {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 4px;
+    .blog-post-meta { gap: 6px 10px; }
+
+    /* Wrap long code lines on phones instead of a sideways scrollbar */
+    .blog-content .code-block { padding: var(--space-sm); }
+    .blog-content .code-block code {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
     }
 
     .post-dot { display: none; }
@@ -2013,6 +2650,68 @@ img {
     .blog-banner {
         max-height: 200px;
     }
+
+    /* Genre tabs: one row that scrolls sideways (keeps header height fixed,
+       so the page itself still never scrolls), with soft faded edges. */
+    .genre-bar {
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
+        overscroll-behavior-x: contain;
+        padding: 4px 14px 8px;
+        -webkit-mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+        mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+    }
+
+    .genre-bar::-webkit-scrollbar { display: none; }
+
+    /* Centre the tabs when they fit, start-align when they overflow */
+    .genre-bar > :first-child { margin-left: auto; }
+    .genre-bar > :last-child  { margin-right: auto; }
+
+    .genre-btn { font-size: 0.8rem; padding: 0.4rem 0.75rem; }
+    .genre-btn:hover { transform: none; }
+
+    .blog-listing { gap: var(--space-sm); }
+}
+
+@media (min-width: 769px) {
+    .genre-bar { flex-wrap: wrap; }
+}
+
+@media (max-width: 560px) {
+    .blog-listing[data-layout="grid"] { grid-template-columns: minmax(0, 1fr); }
+    .blog-tile { min-height: 0; }
+
+    .blog-card-body { padding: 1rem 1.1rem; }
+
+    /* List rows: date above the title instead of beside it */
+    .blog-row {
+        flex-wrap: wrap;
+        row-gap: 2px;
+        padding: 0.6rem 0.85rem;
+    }
+    .blog-row-date   { flex-basis: 100%; min-width: 0; }
+    .blog-row-title  { flex: 1; white-space: normal; }
+    .blog-row-leader { display: none; }
+
+    .genre-info-desc { display: none; }
+}
+
+/* Short viewports: keep the genre tabs, drop secondary lines */
+@media (max-height: 760px) {
+    .genre-info { margin-bottom: var(--space-xs); }
+    .blog-tile  { min-height: 8rem; }
+}
+
+@media (max-height: 560px) {
+    .genre-info { display: none; }
+    .genre-bar  { padding-bottom: 6px; }
+    .genre-btn  { font-size: 0.76rem; padding: 0.3rem 0.65rem; }
+    .blog-tile  { min-height: 0; }
+    .blog-tile-excerpt { -webkit-line-clamp: 2; line-clamp: 2; }
 }
 
 /* ============================================

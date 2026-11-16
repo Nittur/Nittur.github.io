@@ -12,6 +12,7 @@
  *   ---
  *   category: movie          ← movie | food | item | game
  *   icon: 🎬
+ *   label: Movies            ← optional tab name (default: plural of category)
  *   ---
  *
  *   - Inception | 10 | 2025-01-15
@@ -45,8 +46,25 @@ const HTML_ESCAPES = {
     "'": '&#39;',
 };
 
+// Tab labels for the built-in categories; anything else gets "+s"
+const DEFAULT_LABELS = { movie: 'Movies', game: 'Games', food: 'Food', item: 'Items' };
+
 const escapeHtml = value =>
     String(value).replace(/[&<>"']/g, char => HTML_ESCAPES[char]);
+
+// "2025-01-15" → local-time Date (new Date('2025-01-15') is UTC and
+// shows the previous day for anyone west of Greenwich)
+function parseDate(str) {
+    const m = String(str || '').trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    const d = m ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date(str);
+    return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function categoryLabel(category, label) {
+    if (label) return label;
+    const key = category.toLowerCase();
+    return DEFAULT_LABELS[key] || category.charAt(0).toUpperCase() + category.slice(1) + 's';
+}
 
 // ── Parse helpers ─────────────────────────────
 
@@ -55,7 +73,7 @@ function parseIndexMd(text) {
         .replace(/\r\n/g, '\n')
         .split('\n')
         .map(l => l.trim())
-        .filter(l => l && !l.startsWith('#') && l.endsWith('.md'));
+        .filter(l => l && !l.startsWith('#') && /^[\w.-]+\.md$/.test(l));
 }
 
 function parseCategoryFrontmatter(raw) {
@@ -79,7 +97,7 @@ function parseCategoryFrontmatter(raw) {
 }
 
 // Parse review lines: "- Title | score | YYYY-MM-DD"
-function parseCategoryItems(raw, category, icon) {
+function parseCategoryItems(raw, category, icon, label) {
     const items = [];
     raw.replace(/\r\n/g, '\n').split('\n').forEach(line => {
         const m = line.trim().match(/^-\s*(.+)$/);
@@ -93,7 +111,7 @@ function parseCategoryItems(raw, category, icon) {
         const date  = parts[2] || '';
 
         if (title && !isNaN(score)) {
-            items.push({ title, score, date, category, icon });
+            items.push({ title, score, date, category, icon, label });
         }
     });
     return items;
@@ -125,7 +143,8 @@ async function fetchCategory(filename) {
 
     const category = data.category || filename.replace('.md', '');
     const icon     = data.icon     || '📌';
-    return parseCategoryItems(data.body, category, icon);
+    const label    = categoryLabel(category, data.label);
+    return parseCategoryItems(data.body, category, icon, label);
 }
 
 async function fetchAllReviews() {
@@ -148,10 +167,15 @@ function groupByCategory(reviews) {
         }
         grouped.set(review.category, {
             icon:  review.icon || '📌',
-            label: review.category.charAt(0).toUpperCase() + review.category.slice(1) + 's',
+            label: review.label,
             items: [review],
         });
     });
+
+    // Newest first inside every category (undated items sink to the bottom)
+    grouped.forEach(entry => entry.items.sort(
+        (a, b) => (parseDate(b.date) || 0) - (parseDate(a.date) || 0)
+    ));
 
     return grouped;
 }
@@ -167,7 +191,7 @@ function renderReviews(category) {
     }
 
     reviewsList.innerHTML = items.map((review, index) => `
-        <div class="review-item" style="animation-delay:${index * 0.1}s">
+        <div class="review-item" style="animation-delay:${Math.min(index, 12) * 0.08}s">
             <div class="review-item-header">
                 <span class="review-icon">${escapeHtml(review.icon)}</span>
                 <div class="review-info">
@@ -185,8 +209,8 @@ function renderReviews(category) {
 
 // Format review date
 function formatReviewDate(dateStr) {
-    const date = new Date(dateStr);
-    return Number.isNaN(date.getTime()) ? dateStr : REVIEW_DATE_FORMAT.format(date);
+    const date = parseDate(dateStr);
+    return date ? REVIEW_DATE_FORMAT.format(date) : dateStr;
 }
 
 // Build category buttons from the categories found while loading
@@ -207,6 +231,9 @@ function showCategory(category) {
     reviewsSection.classList.add('is-visible');
     categoryTitle.textContent = `${icon} ${label}`;
     reviewsList.scrollTop = 0;
+
+    // Remember the open category in the URL (reviews.html?cat=game)
+    history.replaceState(null, '', `reviews.html?cat=${encodeURIComponent(category)}`);
 
     categoryBar.querySelectorAll('.category-btn').forEach(button => {
         const isActive = button.dataset.category === category;
@@ -235,7 +262,15 @@ async function init() {
 
     try {
         reviewsByCategory = groupByCategory(await fetchAllReviews());
+        if (reviewsByCategory.size === 0) {
+            categoryBar.innerHTML = `<span class="load-note">no reviews yet</span>`;
+            return;
+        }
         buildCategoryButtons();
+
+        // Open the category from ?cat=, else the first one, so the page is never empty
+        const wanted = new URLSearchParams(location.search).get('cat');
+        showCategory(reviewsByCategory.has(wanted) ? wanted : reviewsByCategory.keys().next().value);
     } catch (err) {
         console.error('Failed to load reviews:', err);
         categoryBar.innerHTML =

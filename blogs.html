@@ -8,6 +8,7 @@
     <meta name="description" content="SINGULARITY — thoughts, tools, and ideas">
     <title>Blog | SINGULARITY</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9B%A9%3C/text%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
@@ -51,8 +52,12 @@
             </p>
         </section>
 
-        <div class="blog-listing" id="blog-listing">
-            <!-- Cards injected here -->
+        <!-- Genre tabs — built from content/blogs/genres.md -->
+        <nav class="genre-bar" id="genre-bar" aria-label="Blog genres" hidden></nav>
+        <p class="genre-info" id="genre-info" hidden></p>
+
+        <!-- Posts — layout (cards | list | grid) comes from the genre -->
+        <div class="blog-listing" id="blog-listing" data-layout="cards">
             <div class="blog-loading">
                 <span class="retro-text blog-loading-text">loading posts...</span>
             </div>
@@ -61,22 +66,23 @@
 
     <!-- ── READER VIEW ───────────────────────── -->
     <main class="container" id="view-reader" style="display:none;">
-        
-        <!-- Banner image (shown if post has one) -->
-        <div class="blog-banner" id="blog-banner" style="display:none;">
-            <img id="blog-banner-img" src="" alt="" class="blog-banner-img">
-        </div>
-
         <article class="blog-post" id="blog-post">
-            <!-- Post header -->
+            <button type="button" class="blog-back-btn" id="back-btn">← All Posts</button>
+
+            <!-- Banner image (shown if post has one) -->
+            <div class="blog-banner" id="blog-banner" hidden>
+                <img id="blog-banner-img" src="data:," alt="" class="blog-banner-img">
+            </div>
+
             <header class="blog-post-header">
-                <button class="blog-back-btn" id="back-btn">← All Posts</button>
                 <h1 class="blog-post-title" id="post-title"></h1>
                 <div class="blog-post-meta" id="post-meta">
-                    <span class="post-date" id="post-date"></span>
+                    <span class="post-genre" id="post-genre"></span>
+                    <span class="post-dot">·</span>
+                    <time class="post-date" id="post-date"></time>
                     <span class="post-dot">·</span>
                     <span class="post-readtime" id="post-readtime"></span>
-                    <span class="post-dot">·</span>
+                    <span class="post-dot" id="post-tags-dot">·</span>
                     <div class="post-tags" id="post-tags"></div>
                 </div>
             </header>
@@ -84,14 +90,13 @@
             <!-- Rendered markdown content -->
             <div class="blog-content" id="blog-content"></div>
 
-            <!-- Post footer -->
             <footer class="blog-post-footer">
-                <button class="blog-back-btn" id="back-btn-footer">← All Posts</button>
+                <button type="button" class="blog-back-btn" id="back-btn-footer">← All Posts</button>
             </footer>
         </article>
     </main>
 
-    <footer class="main-footer" id="site-footer">
+    <footer class="main-footer">
         <p class="footer-text">
             <span class="retro-text">2026</span>
             <span class="footer-divider">◈</span>

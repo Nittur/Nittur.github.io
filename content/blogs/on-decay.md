@@ -1,7 +1,9 @@
 ---
 title: On Decay
 date: 2025-01-20
+genre: thoughts
 tags: thoughts, design
+draft: true
 font: serif
 accent: #FF6B9D
 ---

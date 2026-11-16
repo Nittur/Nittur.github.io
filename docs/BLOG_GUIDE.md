@@ -1,213 +1,178 @@
 # Blog Guide
 
-Write posts as `.md` files in `content/blogs/`, then add the filename to `content/blogs/index.md`. No JS or HTML edits needed.
+You write posts as `.md` files in `content/blogs/`. Each post belongs to a **genre**, and each genre has its own tab and its own list layout. You never need to edit JS or HTML.
 
 ---
 
-## Creating a Post
+## Quick Start: New Post
 
-1. Create `content/blogs/my-post-title.md`
-2. Add `my-post-title.md` to `content/blogs/index.md` (one line)
+1. Copy `content/blogs/_TEMPLATE.md` to `content/blogs/my-post.md`.
+2. Add `my-post.md` on its own line in `content/blogs/index.md`.
+3. Fill in the frontmatter, write the post, and set `draft: false`.
 
-Done — no JS or HTML changes needed.
+Done. The post appears under **All** and under its genre's tab, sorted newest first.
+
+> Use lowercase-with-dashes filenames (`my-post.md`), because the filename becomes the post's URL. Only letters, numbers, `.`, `-` and `_` are accepted in `index.md`.
 
 ---
 
-## .md File Format
+## Genres
+
+Genres are defined once, in `content/blogs/genres.md`, with one line per genre:
+
+```
+- id         | Label      | icon | accent  | layout | description
+- philosophy | Philosophy | ☯    | #6C63FF | cards  | reading notes, arguments, big questions
+- thoughts   | Thoughts   | ◈    | #FF6B9D | cards  | essays on everything else
+- tech       | Tech       | ⌨    | #4ECDC4 | grid   | tools, builds and experiments
+- notes      | Notes      | ✎    | #FFD93D | list   | short, half-formed ideas
+```
+
+| Field         | What it does |
+|---------------|--------------|
+| `id`          | What you write in a post: `genre: tech` |
+| `Label`       | Tab name |
+| `icon`        | One emoji or symbol, shown on the tab, chips and grid tiles |
+| `accent`      | Hex colour for the tab glow, titles and links (a post's own `accent` overrides it) |
+| `layout`      | `cards`, `list` or `grid` (see below) |
+| `description` | One line shown under the tabs |
+
+- The line order in `genres.md` is the tab order.
+- A genre with **no published posts is hidden**, so you can define genres before you write for them.
+- A post whose genre is missing or misspelled appears under an **Other** tab.
+- **To add a genre:** add one line. **To rename one:** change its `Label`. Keep the `id` so existing posts still match.
+
+### The three layouts
+
+```
+cards: essays                      list: short notes
+┌─────────────────────────────┐   Jan 4, 2026  Idea about X ········ 1 min
+│ Apr 15 · 3 min read         │   Jan 2, 2026  Another note ········ 2 min
+│ Title of the Essay          │   Dec 9, 2025  Something small ····· 1 min
+│ First paragraph excerpt…    │
+│ #tag #tag          Read →   │
+└─────────────────────────────┘
+
+grid: tools / projects / picks
+┌──────────────┐ ┌──────────────┐
+│ ⌨            │ │ ⌨            │
+│ My Setup     │ │ Tiny CLI     │
+│ excerpt…     │ │ excerpt…     │
+│ Jan 2   3 min│ │ Dec 1   2 min│
+└──────────────┘ └──────────────┘
+```
+
+The **All** tab always uses `cards` and shows a genre chip on each card.
+
+---
+
+## Post Frontmatter
 
 ```
 ---
 title: My Post Title
-date: 2025-01-26
-tags: thoughts, tech
+date: 2026-01-31
+genre: thoughts
+tags: idea, another-tag
+draft: false
 font: sans
 accent: #FF6B9D
-banner: https://example.com/image.jpg
+banner: images/my-banner.jpg
 layout: wide
+excerpt: Optional custom summary for the listing.
 ---
-
-Your content here...
 ```
 
-### Frontmatter Fields
+| Field     | Values                  | Effect |
+|-----------|-------------------------|--------|
+| `title`   | any text                | Post title (required) |
+| `date`    | `YYYY-MM-DD`            | Sort order and display date (required) |
+| `genre`   | an id from `genres.md`  | Which tab the post is listed under |
+| `tags`    | `tag1, tag2`            | Tag pills on the card and the post |
+| `draft`   | `true` / `false`        | `true` hides the post from the listing; it still opens via its direct link (marked DRAFT) |
+| `font`    | `sans` `serif` `mono`   | Body font for the post |
+| `accent`  | `#hexcolor`             | Title, heading and link colour. If empty, the genre's colour is used |
+| `banner`  | URL or `images/x.jpg`   | Hero image at the top of the post |
+| `layout`  | `wide` `narrow`         | Reading column width (default `wide`) |
+| `excerpt` | any text                | Custom listing summary. If empty, the first prose paragraph is used |
 
-| Field    | Values                        | Effect |
-|----------|-------------------------------|--------|
-| `title`  | any text                      | Post title (required) |
-| `date`   | `YYYY-MM-DD`                  | Sort order + display (required) |
-| `tags`   | `tag1, tag2`                  | Tag pills on card and post |
-| `font`   | `sans` `mono` `serif`         | Body font for the post |
-| `accent` | `#hexcolor`                   | Color for headings, links, card title bar |
-| `banner` | URL or `images/image.jpg`      | Full-width hero image at top |
-| `layout` | `wide` `narrow`               | Content width (default: `wide`) |
-| `excerpt`| any text                      | Custom listing excerpt (else uses first paragraph) |
+Fields you leave empty, or delete, fall back to their defaults.
 
 ---
 
 ## Markdown Reference
 
-### Text
-
-```markdown
-**bold**
-*italic*
-***bold and italic***
-`inline code`
-==highlighted text==
-^^small caption text^^
-```
-
-### Headings
-
-```markdown
-# H1 - uses accent color
-## H2 - uses accent color, underline
+~~~markdown
+# H1                  (accent colour)
+## H2                 (accent colour, underline)
 ### H3
-#### H4 - monospace
-```
+#### H4               (monospace)
 
-### Links & Images
+**bold**  *italic*  ***both***  `inline code`
+==highlighted==  ^^small caption^^
 
-```markdown
-[link text](https://url.com)
+[link text](https://url.com)           opens in a new tab
+![caption](images/pic.jpg)             on its own line: figure with caption
 
-![caption text](https://image-url.com)
+> pull-quote with accent border
 
-<!-- Standalone images become <figure> with caption -->
-<!-- Inline images stay inline -->
-```
+- bullet
+1. numbered
 
-### Code
+---                                    divider
 
-````markdown
 ```python
-def hello():
-    print("world")
-```
-````
-
-Inline: `` `some code` ``
-
-### Blockquote
-
-```markdown
-> This becomes a styled pull-quote with an accent-colored left border.
+code block
 ```
 
-### Lists
-
-```markdown
-- item one
-- item two
-
-1. first
-2. second
-```
-
-### Divider
-
-```markdown
----
-```
+<!-- comments are ignored, so you can use them for private notes -->
+~~~
 
 ---
 
-## Examples
+## Hiding and Removing Posts
 
-### Minimal Post
-
-```markdown
----
-title: Hello World
-date: 2025-01-26
-tags: meta
----
-
-First paragraph becomes the listing excerpt automatically.
-
-## A Section
-
-Content goes here.
-```
-
-### Styled Post with Banner
-
-```markdown
----
-title: My Setup
-date: 2025-01-26
-tags: tools, setup
-font: mono
-accent: #4ECDC4
-banner: https://images.unsplash.com/photo-xxx?w=1200
-layout: wide
----
-
-# My Setup
-
-Everything I use to get things done.
-```
-
-### Personal / Essay
-
-```markdown
----
-title: Thoughts on Silence
-date: 2025-01-26
-tags: personal
-font: serif
-accent: #6C63FF
----
-
-> A quote to open with.
-
-Three paragraphs of actual content...
-```
+| Goal | How |
+|------|-----|
+| Work in progress, not listed | `draft: true` |
+| Preview a draft | open `blogs.html?post=my-post.md` |
+| Remove from the site | delete its line from `index.md` (or wrap it in `<!-- -->`) |
 
 ---
 
-## Registering Posts
-
-Posts are auto-discovered from `content/blogs/index.md`. Add your filename there (one per line):
+## Links
 
 ```
-on-decay.md
-sartre.md
-my-new-post.md
+blogs.html                     all posts
+blogs.html?genre=tech          one genre tab
+blogs.html?post=my-post.md     a single post
 ```
 
-Posts are sorted by `date` (newest first).
+The browser Back and Forward buttons move between tabs and posts.
+
+---
+
+## Previewing Locally
+
+Browsers block `fetch` on `file://`, so run a local server from the repo root:
+
+```
+npx serve .          then open http://localhost:3000/blogs.html
+python -m http.server  then open http://localhost:8000/blogs.html
+```
 
 ---
 
 ## File Structure
 
 ```
-/
-├── index.html           # Bento home page
-├── blogs.html           # Blog listing + reader (single page)
-├── reviews.html         # Review categories
-├── css/
-│   └── styles.css       # Styling + animations for all pages
-├── js/
-│   ├── blogs.js         # MD parser + fetch + UI + routing
-│   └── reviews.js       # Review loader + UI
-├── images/              # Banner / hero images referenced by posts
-└── content/
-    ├── blogs/
-    │   ├── index.md     # Lists post files
-    │   ├── on-decay.md
-    │   └── sartre.md
-    └── reviews/         # One .md per review category
-        └── index.md
-```
-
----
-
-## Deep Linking
-
-Every post is linkable:
-
-```
-https://yoursite.com/blogs.html?post=on-decay.md
+content/blogs/
+├── index.md        list of post files (one per line)
+├── genres.md       genre tabs: label, icon, accent, layout
+├── _TEMPLATE.md    copy this to start a post
+├── sartre.md
+└── on-decay.md
+js/blogs.js         markdown parser, genres, routing, rendering
+css/styles.css      all styling (search for "BLOG SYSTEM")
+images/             banner and post images
 ```

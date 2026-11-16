@@ -33,6 +33,7 @@ icon: 🎬
 |-------|----------|-------------|
 | `category` | Yes | `movie`, `food`, `item`, or `game` |
 | `icon` | Yes | Emoji: 🎬 🍜 📦 🎮 |
+| `label` | No | Tab name. Defaults: Movies, Games, Food, Items (other categories get an "s" added) |
 
 ### Item Line Format
 
@@ -55,6 +56,8 @@ Example cases:
 - Interstellar | 8.5 | 2025-02-01
 - No Date Thing | 7
 ```
+
+Items are shown newest first. The first category opens automatically, and `reviews.html?cat=game` links straight to a category.
 
 ### Categories & Icons
 
