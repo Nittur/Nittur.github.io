@@ -20,9 +20,8 @@
    7. Home Page (single viewport)
    8. Cards & Components
    9. Reviews Page (single viewport shell)
-   10. Footer
-   11. Animations
-   12. Responsive Design
+   10. Animations
+   11. Responsive Design
    ============================================ */
 
 
@@ -165,8 +164,7 @@ img {
 .blog-card,
 .zen-card,
 .category-btn,
-.main-nav,
-.main-footer {
+.main-nav {
     background-image: var(--pixel-pattern);
     background-size: var(--pixel-pattern-size);
 }
@@ -1135,11 +1133,6 @@ img {
     padding: 0 0 var(--space-sm);
 }
 
-.reviews-page .main-footer,
-.blogs-page .main-footer {
-    padding: var(--space-sm) var(--space-md);
-}
-
 .page-header {
     text-align: center;
     padding: var(--space-md) 0;
@@ -1313,10 +1306,8 @@ img {
 @media (max-height: 560px) {
     .reviews-page .hero-subtitle,
     .reviews-page .page-header .header-leaf,
-    .reviews-page .main-footer,
     .blogs-page .hero-subtitle,
-    .blogs-page .page-header .header-leaf,
-    .blogs-page .main-footer { display: none; }
+    .blogs-page .page-header .header-leaf { display: none; }
 
     .reviews-page .hero-title,
     .blogs-page .hero-title {
@@ -1440,31 +1431,7 @@ img {
 }
 
 /* ============================================
-   10. FOOTER
-   ============================================ */
-
-.main-footer {
-    text-align: center;
-    padding: var(--space-lg) var(--space-md);
-    background-color: rgba(9, 9, 16, 0.85);
-    border-top: var(--pixel-border);
-    margin-top: auto;        /* pushes footer to bottom of flex body */
-    flex-shrink: 0;
-}
-
-.footer-text {
-    font-size: 0.9rem;
-    color: var(--color-text-muted);
-}
-
-.footer-divider {
-    margin: 0 var(--space-sm);
-    color: var(--color-pink);
-}
-
-
-/* ============================================
-   11. ANIMATIONS
+   10. ANIMATIONS
    ============================================ */
 
 @keyframes float {
@@ -1525,7 +1492,7 @@ img {
 
 
 /* ============================================
-   12. RESPONSIVE DESIGN
+   11. RESPONSIVE DESIGN
    ============================================ */
 
 @media (max-width: 768px) {
